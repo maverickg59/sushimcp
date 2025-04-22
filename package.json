@@ -1,0 +1,46 @@
+{
+  "name": "sushimcp",
+  "version": "0.1.0",
+  "description": "MCP server for accessing llms.txt documentation sources.",
+  "type": "module",
+  "exports": "./dist/index.js",
+  "bin": {
+    "sushimcp": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts --minify",
+    "dev": "npm run build -- --watch",
+    "start": "node dist/index.js --url hono:https://hono.dev/llms-full.txt"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "llms.txt",
+    "documentation",
+    "cli"
+  ],
+  "author": "Chris White <chris@chriswhite.rocks> (https://chriswhite.rocks)",
+  "license": "AGPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/maverickg59/sushimcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/maverickg59/sushimcp/issues"
+  },
+  "homepage": "https://github.com/maverickg59/sushimcp#readme",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://npm.pkg.github.com"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^0.5.2",
+    "commander": "^12.1.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.11",
+    "tsup": "^8.2.2",
+    "typescript": "^5.5.3"
+  }
+}
