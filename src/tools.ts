@@ -9,46 +9,41 @@ import { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.j
 import { parseFetchTarget, fetchContent, checkDomainAccess } from "./utils.js";
 
 // --- Tool Schemas ---
-export const ListSourcesInputSchema = z.object({});
-
-export const FetchLlmsTextInputSchema = z.object({
+export const FetchDocsInputSchema = z.object({
   url: z
     .string()
-    .describe("The URL or local path of the llms.txt file to fetch."),
+    .url("Input must contain a valid URL string under the 'url' key."),
 });
 
 // --- Tool Implementations ---
+
+// Renamed and updated signature
 export const list_llms_txt_sources = async (
-  params: z.infer<typeof ListSourcesInputSchema>,
+  // Params removed, context 'docSources' added
   extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
   docSources: Record<string, string> // Pass docSources from server context
 ): Promise<CallToolResult> => {
-  console.error("Processing list_llms_txt_sources request..."); // Log to stderr
-  const sourceList = Object.entries(docSources)
-    .map(([name, url]) => `- ${name}: ${url}`)
-    .join("\n");
-
+  let formatted_sources = "Available documentation sources:\n";
+  for (const name in docSources) {
+    formatted_sources += `- ${name}: ${docSources[name]}\n`;
+  }
   const content: TextContent[] = [
-    {
-      type: "text",
-      text: `Available llms.txt Sources:\n${sourceList}`,
-    },
+    { type: "text", text: formatted_sources.trim() },
   ];
-
-  return {
-    content,
-  };
+  return { content };
 };
 
+// Renamed and updated signature
 export const fetch_llms_txt = async (
-  params: z.infer<typeof FetchLlmsTextInputSchema>,
+  params: z.infer<typeof FetchDocsInputSchema>,
   extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
   allowedDomains: Set<string>
 ): Promise<CallToolResult> => {
   const { url } = params;
-  console.error(`Processing fetch_llms_txt request for URL: ${url}`); // Log to stderr
+  console.error(`Processing fetch_docs request for URL: ${url}`); // Log to stderr
 
   try {
+    // Use utils.ts functions
     const targetInfo = await parseFetchTarget(url);
 
     if (targetInfo.type === "unsupported") {
@@ -70,7 +65,7 @@ export const fetch_llms_txt = async (
       content: result,
     };
   } catch (error: any) {
-    console.error(`Error in fetch_llms_txt for ${url}: ${error.message}`); // Log error to stderr
+    console.error(`Error in fetch_docs for ${url}: ${error.message}`); // Log error to stderr
     throw new Error(
       `Failed to process fetch request for '${url}': ${error.message}`
     );
