@@ -1,83 +1,120 @@
 # SushiMCP
 
-SushiMCP is a Model Context Protocol (MCP) server designed to provide access to documentation content. It allows AI agents, coding assistants, or other MCP clients to discover and fetch documentation specified by URLs pointing to `llms.txt` manifest files or directly to content files (local or remote).
+SushiMCP is a Model Context Protocol (MCP) server that allows MCP clients to discover and fetch missing llms.txt files with ease.
 
-## Inspiration and Attribution
+## Registering SushiMCP with an MCP Client
 
-The concept for this server was inspired by the `mcpdoc` project ([https://github.com/langchain-ai/mcpdoc](https://github.com/langchain-ai/mcpdoc)) from LangChain AI. While SushiMCP is a fresh implementation built entirely in TypeScript for the Node.js ecosystem, the core idea of using MCP to serve documentation sources originates from `mcpdoc`. We thank the `mcpdoc` authors for the initial concept.
-
-## Features
-
-- Implements the Model Context Protocol for interoperability.
-- Registers documentation sources via command-line arguments (`--url name:source`).
-- Supports both remote URLs (http/https) and local file paths as documentation sources.
-- Provides tools for MCP clients to:
-  - `list_llms_txt_sources`: Discover configured documentation sources.
-  - `fetch_llms_txt`: Fetch the content of a specific source URL or path.
-- Includes security controls to restrict fetching from remote domains (`--allow-domain`). Defaults to allowing only domains explicitly listed in remote `--url` sources if no `--allow-domain` flags are provided.
-
-## Installation
-
-1.  **Clone the repository (if you haven't already):**
-    ```bash
-    git clone <your-repository-url>
-    cd sushimcp
-    ```
-2.  **Install dependencies:**
-    ```bash
-    npm install
-    ```
-3.  **Build the project:**
-    ```bash
-    npm run build
-    ```
-    This compiles the TypeScript code into JavaScript in the `dist/` directory.
-
-## Usage (MCP Client Registration)
-
-SushiMCP is primarily designed to be used as a server registered with a Model Context Protocol (MCP) client (like an AI assistant or IDE extension). The client will connect to the server and use its tools (`list_llms_txt_sources`, `fetch_llms_txt`) to access documentation.
-
-To register SushiMCP with your MCP client, you typically need to provide the command and arguments required to start the server. The specifics depend on your client, but the configuration usually involves specifying the executable (`node`), the path to the built server script (`dist/index.js`), and the necessary `--url` and `--allow-domain` arguments.
-
-Refer to your specific MCP client's documentation for instructions on how to register an external MCP server. You can use the `example-config.json` file in this repository as a template or reference for the command structure:
+**Config with custom sources combined using `--urls`:**
 
 ```json
 {
   "SushiMCP": {
-    "command": "node",
+    "command": "npx",
     "args": [
-      "/path/to/your/sushimcp/dist/index.js", // <-- Update this path
-      "--url",
-      "hono:https://hono.dev/llms-full.txt",
-      "--url",
-      "drizzle:https://orm.drizzle.team/llms.txt"
-      // Add more --url and --allow-domain flags as needed
+      "sushimcp",
+      "--urls",
+      "hono:https://hono.dev/llms-full.txt drizzle:https://orm.drizzle.team/llms.txt"
     ]
   }
 }
 ```
 
-For more details on the Model Context Protocol itself, visit [https://modelcontextprotocol.io](https://modelcontextprotocol.io).
+**Minimal Config with default sources only:**
 
-## Tool Usage (for MCP Clients)
+```json
+{
+  "SushiMCP": {
+    "command": "npx",
+    "args": ["sushimcp"]
+  }
+}
+```
 
-Once the server is running, MCP clients can connect and use the following tools:
+**Config with custom sources one by one**
 
-- **`list_llms_txt_sources`**
+```json
+{
+  "SushiMCP": {
+    "command": "npx",
+    "args": [
+      "sushimcp",
+      "--url",
+      "hono:https://hono.dev/llms-full.txt",
+      "--url",
+      "drizzle:https://orm.drizzle.team/llms.txt"
+    ]
+  }
+}
+```
 
-  - **Description:** Lists the `name: url_or_path` pairs configured when the server started.
-  - **Input:** None (Client should send empty params `{}`).
-  - **Output:** Text content listing the available sources.
+## Registration Args
 
-- **`fetch_llms_txt`**
-  - **Description:** Fetches the content from the specified documentation source URL or path.
-  - **Input:** An object containing the URL/path: `{ "url": "source_url_or_path_from_list_output" }`. The `url` value should match one of the URLs or paths provided by `list_llms_txt_sources`.
-  - **Output:** Text content of the fetched file.
-  - **Security:** The server will enforce the `--allow-domain` rules for remote URLs.
+- `--url <name:url_or_path>` (Repeatable)
+  - Registers a documentation source.
+  - `<name>`: A short identifier (e.g., `HonoDocs`).
+  - `<url_or_path>`
+    - URL (e.g., `https://hono.dev/llms.txt`) or _absolute_ local file path (e.g., `/path/to/project/llms.txt`).
+    - **Note:** Relative paths might not work reliably when run via `npx` depending on the execution context; prefer absolute paths for local files.
+- `--urls <string>`
+  - Specify multiple sources as a single space-separated string (e.g., `"drizzle:URL1 hono:URL2"`).
+- `--allow-domain <domain>`
+  - Allows fetching from a specific domain (repeatable).
+  - Defaults to domains in remote `--url`/`--urls` sources if omitted.
+  - Use `*` to allow all. (NOT RECOMMENDED)
+- `--no-defaults`
+  - (Flag) Disables loading a sensible set of Node/TypeScript ecosystem default sources from.
 
-## Contributing
+**Command Line Equivalents (for reference):**
 
-This project is not currently accepting external contributions. However, you are welcome to fork the repository and modify it for your own purposes under the terms of the license.
+```bash
+# Run with default sources
+npx sushimcp
+
+# Run with only specific URLs, disabling defaults, allowing specific domains
+npx sushimcp --no-defaults --url drizzle:https://orm.drizzle.team/llms.txt --url local:/Users/me/docs.md --allow-domain orm.drizzle.team
+
+# Run using the --urls argument
+npx sushimcp --urls "drizzle:https://orm.drizzle.team/llms.txt hono:https://hono.dev/llms-full.txt"
+```
+
+## Available Tools (for MCP Client)
+
+SushiMCP provides the following tools callable by a registered MCP client:
+
+1.  **`list_llms_txt_sources`**:
+
+    - **Description:** Lists the names of all configured documentation sources.
+    - **Input:** None.
+    - **Output:** JSON array of source names (strings).
+      ```json
+      ["drizzle", "hono", "mylocal"]
+      ```
+
+2.  **`fetch_llms_txt`**:
+    - **Description:** Fetches the content of a specific documentation source by its configured name.
+    - **Input:** JSON object with a `url` key specifying the source _name_ (e.g., `{"url": "drizzle"}`).
+    - **Output:** Text content of the fetched file.
+    - **Security:** The server will enforce the `--allow-domain` rules for remote URLs.
+
+## Source Precedence
+
+The server loads and potentially overrides sources in the following order:
+
+1.  **Defaults:** If `--no-defaults` is **not** specified, internal default sources are loaded first.
+2.  **`--url` arguments:** Sources specified individually via `--url` are loaded next. If a name matches one from the defaults, the `--url` source **overrides** the default.
+3.  **`--urls` argument:** Sources specified via the `--urls` string are loaded last. If a name matches one from the defaults or a previous `--url` argument, the `--urls` source **overrides** it.
+
+## Development
+
+This project is not open for contibutions at the moment, but feel free to fork and extend the project under the terms of the AGPL-3.0-or-later license.
+
+## Inspiration
+
+SushiMCP is inspired by `mcpdoc` ([https://github.com/langchain-ai/mcpdoc](https://github.com/langchain-ai/mcpdoc)) from LangChain AI. SushiMCP was an idea that came to me, but the core architecture is based on `mcpdoc`. Thanks, LangChain!
+
+## Author
+
+Christopher White ([https://github.com/maverickg59](https://github.com/maverickg59))
 
 ## License
 

@@ -1,0 +1,5 @@
+- hono: https://hono.dev/llms-full.txt
+- drizzle: https://orm.drizzle.team/llms.txt
+- better-auth: https://better-auth.com/llms.txt
+- cloudflare: https://developers.cloudflare.com/llms.txt
+- supabase: https://supabase.com/llms.txt

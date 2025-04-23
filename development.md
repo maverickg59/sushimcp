@@ -1,42 +1,74 @@
-## Development (Local Usage)
+# Extending SushiMCP
 
-While the primary use case is via an MCP client, you can run the server directly from the command line for development or testing purposes. You must provide at least one documentation source using the `--url` flag.
+This document provides instructions for setting up a local development environment for SushiMCP. For user-facing instructions on running SushiMCP via `npx`, please see [`README.md`](./README.md).
+
+## Installation
+
+1.  **Clone the repository (if you haven't already):**
+    ```bash
+    git clone https://github.com/maverickg59/sushimcp
+    cd sushimcp
+    ```
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
+3.  **Build the project:**
+    ```bash
+    npm run build
+    ```
+    This compiles the TypeScript code into JavaScript in the `dist/` directory.
+
+## Running Locally
+
+While the primary use case is via an MCP client using `npx`, you can run the server directly from your local build for development or testing purposes using `node`.
+
+**Basic Command:**
 
 ```bash
-node dist/index.js --url <name1>:<url_or_path1> [--url <name2>:<url_or_path2> ...] [--allow-domain <domain1> ...]
+node dist/index.js [arguments...]
 ```
 
 **Arguments:**
 
-- `--url <name>:<url_or_path>`: (Required, Repeatable) Registers a documentation source.
-  - `<name>`: A short identifier for the source (e.g., `HonoDocs`, `MyLocalNotes`).
-  - `<url_or_path>`: The URL (e.g., `https://hono.dev/llms.txt`) or absolute/relative local file path (e.g., `./docs/my_notes.md`, `/path/to/project/llms.txt`) for the documentation source.
-- `--allow-domain <domain>`: (Optional, Repeatable) Explicitly allows the server to fetch content from the specified remote `<domain>`.
-  - If omitted, the server defaults to only allowing fetches from the hostnames explicitly mentioned in any remote `--url` arguments.
-  - Use `--allow-domain "*"` to allow fetching from _any_ remote domain (use with caution).
-  - This flag does not affect fetching from local file paths.
+- `--url <name:url_or_path>` (Repeatable)
+  - Registers a documentation source.
+  - `<name>`: A short identifier (e.g., `HonoDocs`).
+  - `<url_or_path>`: URL (e.g., `https://hono.dev/llms.txt`) or absolute/relative local file path (e.g., `./docs/my_notes.md`, `/path/to/project/llms.txt`). Relative paths are resolved from the current working directory where you run the `node` command.
+- `--urls <string>`
+  - Specify multiple sources as a single space-separated string (e.g., `"drizzle:URL1 hono:URL2"`).
+- `--allow-domain <domain>` (Repeatable)
+  - Allows fetching from a specific remote domain.
+  - Defaults to domains inferred from remote `--url`/`--urls` sources if omitted.
+  - Use `*` to allow all domains (use with caution).
+- `--no-defaults` (Flag)
+  - Disables loading the default sources defined internally in `src/defaults.md`.
 
-**Examples:**
+**Local Execution Examples:**
 
-1.  **Single remote source (Hono), default domain allowance:**
+```bash
+# 1. Run with only default sources (assuming src/defaults.md exists)
+node dist/index.js
 
-    ```bash
-    node dist/index.js --url Hono:https://hono.dev/llms.txt
-    # Server will only allow fetches from hono.dev
-    ```
+# 2. Run combining defaults and a specific --url source
+node dist/index.js --url mylocal:./local-docs.md
 
-2.  **Multiple sources (remote + local), explicit domain allowance:**
+# 3. Run using --urls, disabling defaults, and allowing necessary domains
+# (Domains must be explicitly allowed if not inferred from --urls sources)
+node dist/index.js --no-defaults --urls "drizzle:https://orm.drizzle.team/llms.txt hono:https://hono.dev/llms-full.txt" --allow-domain orm.drizzle.team --allow-domain hono.dev
 
-    ```bash
-    node dist/index.js --url LangGraphJS:https://langchain-ai.github.io/langgraphjs/llms.txt --url LocalNotes:/Users/chris/notes.md --allow-domain langchain-ai.github.io --allow-domain example.com
-    # Server will allow fetches from langchain-ai.github.io and example.com, plus the local file.
-    # It will NOT allow fetches from hono.dev unless explicitly added.
-    ```
+# 4. Run with defaults and allow all remote domains (not recommended)
+node dist/index.js --allow-domain "*"
+```
 
-3.  **Remote source, allow all domains:**
-    ```bash
-    node dist/index.js --url Hono:https://hono.dev/llms.txt --allow-domain "*"
-    # Server will allow fetches from any domain.
-    ```
+**Source Precedence:**
 
-- **Run (Example):** `npm start` (uses the example command defined in `package.json`) or use `node dist/index.js ...` with desired flags for local testing.
+Sources are loaded and potentially overridden in this order:
+
+1.  **Defaults:** Loaded first (unless `--no-defaults` is used).
+2.  **`--url` arguments:** Loaded next, overriding defaults with the same name.
+3.  **`--urls` argument:** Loaded last, overriding defaults or `--url` sources with the same name.
+
+**NPM Script:**
+
+You can modify the `scripts.start` command in `package.json` for convenient repetitive testing during development, then run `npm start`.
