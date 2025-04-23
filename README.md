@@ -11,7 +11,7 @@ SushiMCP is a Model Context Protocol (MCP) server that allows MCP clients to dis
   "SushiMCP": {
     "command": "npx",
     "args": [
-      "sushimcp",
+      "@chriswhiterocks/sushimcp",
       "--urls",
       "hono:https://hono.dev/llms-full.txt drizzle:https://orm.drizzle.team/llms.txt"
     ]
@@ -25,7 +25,7 @@ SushiMCP is a Model Context Protocol (MCP) server that allows MCP clients to dis
 {
   "SushiMCP": {
     "command": "npx",
-    "args": ["sushimcp"]
+    "args": ["@chriswhiterocks/sushimcp"]
   }
 }
 ```
@@ -37,7 +37,7 @@ SushiMCP is a Model Context Protocol (MCP) server that allows MCP clients to dis
   "SushiMCP": {
     "command": "npx",
     "args": [
-      "sushimcp",
+      "@chriswhiterocks/sushimcp",
       "--url",
       "hono:https://hono.dev/llms-full.txt",
       "--url",
@@ -68,13 +68,13 @@ SushiMCP is a Model Context Protocol (MCP) server that allows MCP clients to dis
 
 ```bash
 # Run with default sources
-npx sushimcp
+npx @chriswhiterocks/sushimcp
 
 # Run with only specific URLs, disabling defaults, allowing specific domains
-npx sushimcp --no-defaults --url drizzle:https://orm.drizzle.team/llms.txt --url local:/Users/me/docs.md --allow-domain orm.drizzle.team
+npx @chriswhiterocks/sushimcp --no-defaults --url drizzle:https://orm.drizzle.team/llms.txt --url local:/Users/me/docs.md --allow-domain orm.drizzle.team
 
 # Run using the --urls argument
-npx sushimcp --urls "drizzle:https://orm.drizzle.team/llms.txt hono:https://hono.dev/llms-full.txt"
+npx @chriswhiterocks/sushimcp --urls "drizzle:https://orm.drizzle.team/llms.txt hono:https://hono.dev/llms-full.txt"
 ```
 
 ## Available Tools (for MCP Client)

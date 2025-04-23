@@ -1,5 +1,5 @@
 {
-  "name": "@maverickg59/sushimcp",
+  "name": "@chriswhiterocks/sushimcp",
   "version": "0.0.1",
   "description": "MCP server for accessing llms.txt documentation sources.",
   "type": "module",
@@ -17,7 +17,9 @@
     "model-context-protocol",
     "llms.txt",
     "documentation",
-    "cli"
+    "cli",
+    "context",
+    "documentation"
   ],
   "author": "Chris White <chris@chriswhite.rocks> (https://chriswhite.rocks)",
   "license": "AGPL-3.0-or-later",
@@ -29,10 +31,6 @@
     "url": "https://github.com/maverickg59/sushimcp/issues"
   },
   "homepage": "https://github.com/maverickg59/sushimcp#readme",
-  "publishConfig": {
-    "access": "public",
-    "registry": "https://npm.pkg.github.com/"
-  },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^0.5.2",
     "commander": "^12.1.0",
