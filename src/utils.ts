@@ -17,7 +17,6 @@ export function extractDomain(urlString: string): string | null {
       return url.hostname.toLowerCase();
     }
   } catch (e) {
-    // Ignore errors, might be a local path or invalid URL
     console.error(
       `Could not parse '${urlString}' as URL for domain extraction.`
     );
@@ -45,10 +44,8 @@ export function checkDomainAccess(
     targetInfo.type === "localFileUrl" ||
     targetInfo.type === "localPath"
   ) {
-    console.error("Local file access permitted."); // Log to stderr
-    // Add more checks here if needed (e.g., ensure path is within a specific root?)
+    console.error("Local file access permitted.");
   } else {
-    // Should not happen if called after parseFetchTarget successfully returns a valid type
     throw new Error(
       `Internal error: Unsupported target type '${targetInfo.type}' during access check.`
     );
@@ -90,10 +87,8 @@ export async function parseFetchTarget(
       };
     }
   } catch (urlError) {
-    // If it's not a valid URL, attempt to treat it as a local path.
     try {
       const resolvedPath = path.resolve(targetUrlString);
-      // Check if the path actually exists (optional, but good practice)
       try {
         await fs.stat(resolvedPath);
       } catch (statError) {
@@ -107,7 +102,6 @@ export async function parseFetchTarget(
         originalInput: targetUrlString,
       };
     } catch (pathError: any) {
-      // It's neither a valid URL nor a resolvable path.
       const urlErrorMessage =
         urlError instanceof Error ? urlError.message : String(urlError);
       return {
@@ -142,8 +136,6 @@ export async function fetchContent(targetInfo: TargetInfo): Promise<string> {
         `Cannot fetch content for unsupported target type: ${targetInfo.reason}`
       );
     default: {
-      // This should be unreachable due to TypeScript's exhaustiveness checks
-      // If it happens, it's an internal logic error.
       const exhaustiveCheck: never = targetInfo;
       throw new Error(
         `Internal error: Unhandled target info type: ${JSON.stringify(
