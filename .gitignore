@@ -1,6 +1,3 @@
-dist
-node_modules
-
 # Logs
 logs
 *.log
@@ -152,4 +149,4 @@ public/build/
 .pnp.*
 
 # SushiMCP specific
-dist/
+.DS_Store
