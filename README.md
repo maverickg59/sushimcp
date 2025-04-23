@@ -1,6 +1,6 @@
 # SushiMCP
 
-SushiMCP is a Model Context Protocol (MCP) server that allows MCP clients to discover and fetch missing llms.txt files with ease.
+SushiMCP is a dev tools MCP Server designed to serve up context on a roll, just like your favorite restaurant.
 
 ## Registering SushiMCP with an MCP Client
 

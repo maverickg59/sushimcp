@@ -1,7 +1,7 @@
 {
   "name": "@chriswhiterocks/sushimcp",
-  "version": "0.0.6",
-  "description": "MCP server for accessing llms.txt documentation sources.",
+  "version": "0.0.10",
+  "description": "SushiMCP is a dev tools MCP Server designed to serve up context on a roll, just like your favorite restaurant.",
   "type": "module",
   "exports": "./dist/index.js",
   "bin": {
@@ -9,6 +9,8 @@
   },
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts --minify && cp -r static/ dist/static",
+    "publish": "npm publish --access public",
+    "clear:npx": "npx clear-npx-cache",
     "dev": "npm run build -- --watch",
     "start": "node dist/index.js --url hono:https://hono.dev/llms-full.txt"
   },
@@ -16,6 +18,10 @@
     "mcp",
     "model-context-protocol",
     "llms.txt",
+    "llms-full.txt",
+    "llms-mini.txt",
+    "llmstxt",
+    "llms-txt",
     "documentation",
     "cli",
     "context",

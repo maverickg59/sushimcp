@@ -24,7 +24,7 @@ const server = new McpServer({
   name: "SushiMCP",
   version: packageJson.version,
   displayName: "SushiMCP",
-  description: "MCP server for accessing llms.txt documentation sources.",
+  description: "SushiMCP is a dev tools MCP Server designed to serve up context on a roll, just like your favorite restaurant.",
   publisher: "Chris White <chris@chriswhite.rocks>",
 });
 

@@ -127,7 +127,7 @@ To provide an indexable, trustable, and useful global directory of MCP-compatibl
 
 ## Existing MCP Registry
 
-https://llmstxt.site/
-https://directory.llmstxt.cloud/
-context7
-https://llmstxthub.com/
+[llmstxt](https://llmstxt.site/)
+[llmstxt directory](https://directory.llmstxt.cloud/)
+[context7](https://context7.com/)
+[llmstxthub](https://llmstxthub.com/)

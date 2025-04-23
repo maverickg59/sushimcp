@@ -169,7 +169,7 @@ export function parseCliArgs(): CliConfig {
   const program = new Command();
   program
     .name("SushiMCP")
-    .description("Starts an MCP server to interact with documentation sources.")
+    .description("Starts SushiMCP, a dev tools MCP Server designed to serve up context on a roll, just like your favorite restaurant.")
     .version(packageJson.version)
     .option(
       "--url <name:url>",
