@@ -1,11 +1,11 @@
 {
   "name": "@chriswhiterocks/sushimcp",
-  "version": "0.0.1",
+  "version": "0.0.6",
   "description": "MCP server for accessing llms.txt documentation sources.",
   "type": "module",
   "exports": "./dist/index.js",
   "bin": {
-    "sushimcp": "./dist/index.js"
+    "sushimcp": "dist/index.js"
   },
   "scripts": {
     "build": "tsup src/index.ts --format esm --dts --minify && cp -r static/ dist/static",
@@ -32,7 +32,7 @@
   },
   "homepage": "https://github.com/maverickg59/sushimcp#readme",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^0.5.2",
+    "@modelcontextprotocol/sdk": "^1.10.2",
     "commander": "^12.1.0",
     "zod": "^3.23.8"
   },
