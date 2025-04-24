@@ -110,7 +110,7 @@ This project is not open for contibutions at the moment, but feel free to fork a
 
 ## Inspiration
 
-SushiMCP is inspired by `mcpdoc` ([https://github.com/langchain-ai/mcpdoc](https://github.com/langchain-ai/mcpdoc)) from LangChain AI. SushiMCP was an idea that came to me, but the core architecture is based on `mcpdoc`. Thanks, LangChain!
+SushiMCP is inspired by [`mcpdoc`](https://github.com/langchain-ai/mcpdoc) from LangChain AI. SushiMCP was an idea that came to me, but the core architecture is based on `mcpdoc`. Thanks, LangChain!
 
 ## Author
 
