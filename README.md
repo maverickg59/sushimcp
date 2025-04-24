@@ -64,19 +64,6 @@ SushiMCP is a dev tools MCP Server designed to serve up context on a roll, just 
 - `--no-defaults`
   - (Flag) Disables loading a sensible set of Node/TypeScript ecosystem default sources from.
 
-**Command Line Equivalents (for reference):**
-
-```bash
-# Run with default sources
-npx @chriswhiterocks/sushimcp@latest
-
-# Run with only specific URLs, disabling defaults, allowing specific domains
-npx @chriswhiterocks/sushimcp@latest --no-defaults --url drizzle:https://orm.drizzle.team/llms.txt --url local:/Users/me/docs.md --allow-domain orm.drizzle.team
-
-# Run using the --urls argument
-npx @chriswhiterocks/sushimcp@latest --urls "drizzle:https://orm.drizzle.team/llms.txt hono:https://hono.dev/llms-full.txt"
-```
-
 ## Available Tools (for MCP Client)
 
 SushiMCP provides the following tools callable by a registered MCP client:
