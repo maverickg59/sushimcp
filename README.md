@@ -110,7 +110,7 @@ This project is not open for contibutions at the moment, but feel free to fork a
 
 ## Inspiration
 
-SushiMCP is inspired by [`mcpdoc`](https://github.com/langchain-ai/mcpdoc) from LangChain AI. SushiMCP was an idea that came to me, but the core architecture is based on `mcpdoc`. Thanks, LangChain!
+SushiMCP was born out of frustration with AI assistants generating outdated code. While searching for an MCP that could retrieve llms.txt, I found mcpdoc by LangChain AI. I built a devtools-focused MCP server using their structure, with list_llms_txt_sources and fetch_llms_text tools inspired by it. Thanks, LangChain.
 
 ## Author
 
