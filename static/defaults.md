@@ -8,6 +8,7 @@
 - chakraui: https://chakra-ui.com/llms.txt
 - chakraui_full: https://chakra-ui.com/llms-full.txt
 - bun: https://bun.sh/llms.txt
+- bun_full: https://bun.sh/llms-full.txt
 - netlify: https://docs.netlify.com/llms.txt
 - prisma: https://www.prisma.io/docs/llms.txt
 - prisma_full: https://prisma.io/docs/llms-full.txt
@@ -50,3 +51,5 @@
 - open-alternative: https://openalternative.co/llms.txt
 - stripe: https://docs.stripe.com/llms.txt
 - ai-engineers-handbook: https://handbook.exemplar.dev/llms-full.txt
+- model-context-protocol: https://modelcontextprotocol.io/llms.txt
+- model-context-protocol_full: https://modelcontextprotocol.io/llms-full.txt

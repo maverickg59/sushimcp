@@ -200,14 +200,14 @@ export function parseCliArgs(): CliConfig {
   const docSources = processUrlOptions(options.url, options.urls, includeDefaults);
   const allowedDomains = processAllowDomainOptions(options.allowDomain, docSources);
 
-  console.log('\n--- SushiMCP Configuration Summary ---');
-  console.log(
+  console.info('\n--- SushiMCP Configuration Summary ---');
+  console.info(
     `Final Documentation Sources: ${JSON.stringify(docSources, null, 2)}`
   );
-  console.log(
+  console.info(
     `Final Allowed Fetch Domains: ${[...allowedDomains].join(", ") || "(None - local only?)"}`
   );
-  console.log("------------------------------------\\n");
+  console.info("------------------------------------\\n");
 
   return { docSources, allowedDomains };
 }

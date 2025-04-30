@@ -10,24 +10,8 @@ import {
   parseFetchTarget,
   fetchContent,
   checkDomainAccess,
-} from "./lib/utils.js";
+} from "../lib/utils.js";
 
-// --- List llms.txt Sources Tool ---
-export const list_llms_txt_sources = async (
-  extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
-  docSources: Record<string, string>
-): Promise<CallToolResult> => {
-  let formatted_sources = "Available documentation sources:\n";
-  for (const name in docSources) {
-    formatted_sources += `- ${name}: ${docSources[name]}\n`;
-  }
-  const content: TextContent[] = [
-    { type: "text", text: formatted_sources.trim() },
-  ];
-  return { content };
-};
-
-// --- Fetch llms.txt Content Tool ---
 export const FetchLlmsTxtInputSchema = z.union([
   z.object({
     url: z
@@ -45,11 +29,9 @@ export const fetch_llms_txt = async (
   console.info(`Processing fetch_docs request with params:`, params);
 
   try {
-    // Handle both input formats
     const urls = Array.isArray(params) ? params : [params.url];
     const results: TextContent[] = [];
 
-    // Process each URL
     for (const url of urls) {
       const targetInfo = await parseFetchTarget(url);
 
@@ -75,36 +57,3 @@ export const fetch_llms_txt = async (
     throw new Error(`Failed to process fetch request: ${error.message}`);
   }
 };
-
-// --- Sushi Digest Tool ---
-export const SushiDigestInputSchema = z.object({
-  name: z.string(),
-});
-
-export const sushi_digest = async (
-  params: z.infer<typeof SushiDigestInputSchema>,
-  extra: RequestHandlerExtra<ServerRequest, ServerNotification>
-): Promise<CallToolResult> => {
-  const { name } = params;
-  console.info(`Processing sushi_digest request for name: ${name}`);
-
-  try {
-    // TODO: Implement sushi_digest logic
-    return {
-      content: [
-        {
-          type: "text",
-          text: `sushi_digest not implemented for name: ${name}`,
-        },
-      ],
-    };
-  } catch (error: any) {
-    console.error(`Error in sushi_digest for ${name}: ${error.message}`);
-    throw new Error(
-      `Failed to process sushi_digest request for '${name}': ${error.message}`
-    );
-  }
-};
-
-// Copyright (C) 2025 Christopher White
-// SPDX-License-Identifier: AGPL-3.0-or-later
