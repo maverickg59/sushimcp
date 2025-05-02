@@ -1,6 +1,6 @@
 {
   "name": "@chriswhiterocks/sushimcp",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "SushiMCP is a dev tools MCP Server designed to serve up context on a roll, just like your favorite restaurant.",
   "type": "module",
   "exports": "./dist/index.js",

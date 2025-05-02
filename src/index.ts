@@ -36,7 +36,7 @@ const server = new McpServer(
   {
     name: "sushimcp",
     version: VERSION,
-    displayName: "sushimcp",
+    displayName: "SushiMCP",
     description:
       "SushiMCP is an MCP Server designed to serve context on a roll.",
     publisher: "Chris White <chris@chriswhite.rocks> https://chriswhite.rocks",
@@ -74,14 +74,14 @@ const server = new McpServer(
 
 server.tool(
   "list_llms_txt_sources",
-  "This tool lists all available source urls where an llms.txt can be fetched. After reading the listed sources, use fetch_llms_txt to fetch any source that matches a technology in the instructions you received. When done, ask the user if they want to use non-MCP tools to search for documentation on any sources this tool could not find.",
+  "This tool lists all available source urls where an llms.txt can be fetched. After reading the listed sources, use fetch_llms_txt to fetch any source that matches a technology in the instructions you received. Prefer llms.txt, but if llms.txt. When done, ask the user if they want to use non-MCP tools to search for documentation on any sources this tool could not find.",
   (extra: RequestHandlerExtra<ServerRequest, ServerNotification>) =>
     list_llms_txt_sources(extra, docSources)
 );
 
 server.tool(
   "fetch_llms_txt",
-  "Fetches the content of one or more llms.txt urls.",
+  "Fetches the content of one or more llms.txt urls. Some llms.txt files compile a list of urls to other llms.txt file locations because listing their full documentation would bloat context. If the documentation you're looking for does not exist in the llms.txt, look for reference links to other llms.txt files and follow those.",
   { input: FetchLlmsTxtInputSchema },
   (
     { input }: { input: z.infer<typeof FetchLlmsTxtInputSchema> },

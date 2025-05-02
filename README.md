@@ -25,6 +25,10 @@ The SushiMCP dev tools MCP Server is designed to help your IDE agent find up-to-
 
 ## Using SushiMCP
 
+Update your global rules:
+
+- Use SushiMCP to fetch llms.txt documentation for any technology, package, or library requested via prompt.
+
 Prompt your IDE agent to use SushiMCP:
 
 ```text
@@ -155,7 +159,7 @@ SushiMCP was born out of frustration with AI assistants generating outdated code
 
 Chris White
 
-[GitHub](https://github.com/maverickg59) | [Email](mailto:chris@chriswhite.rocks) | [Discord](https://discord.com/users/1115027188840939560) | [Website](https://chriswhite.rocks) | [X](https://x.com/chriswhiterox) | [LinkedIn](https://www.linkedin.com/in/chrisewhite) | [Five9Cyber](https://www.fiv9cyber.com/)
+[GitHub](https://github.com/maverickg59) | [Email](mailto:chris@chriswhite.rocks) | [Discord](https://discord.com/users/1115027188840939560) | [Website](https://chriswhite.rocks) | [X](https://x.com/chriswhiterox) | [LinkedIn](https://www.linkedin.com/in/chrisewhite) | [Five9 Cyber](https://www.fiv9cyber.com/)
 
 ## License
 
