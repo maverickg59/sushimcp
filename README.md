@@ -1,6 +1,12 @@
+<div align="center">
+
+![SushiMCP Name Slogan Icon](assets/sushimcp_icon_name_slogan_logo.png)
+
+</div>
+
 # SushiMCP
 
-SushiMCP is an dev tools MCP Server designed to serve up context on a roll.
+The SushiMCP dev tools MCP Server is designed to help your IDE agent find up-to-date docs for the right project.
 
 ## Registering SushiMCP with an MCP Client
 
@@ -15,36 +21,14 @@ SushiMCP is an dev tools MCP Server designed to serve up context on a roll.
 }
 ```
 
-**Config with custom sources combined using `--urls`:**
+[More in-depth examples config examples](assets/config_examples.md)
 
-```json
-{
-  "sushimcp": {
-    "command": "npx",
-    "args": [
-      "@chriswhiterocks/sushimcp@latest",
-      "--urls",
-      "hono:https://hono.dev/llms-full.txt drizzle:https://orm.drizzle.team/llms.txt"
-    ]
-  }
-}
-```
+## Using SushiMCP
 
-**Config with custom sources one by one**
+Prompt your IDE agent to use SushiMCP:
 
-```json
-{
-  "sushimcp": {
-    "command": "npx",
-    "args": [
-      "@chriswhiterocks/sushimcp@latest",
-      "--url",
-      "hono:https://hono.dev/llms-full.txt",
-      "--url",
-      "drizzle:https://orm.drizzle.team/llms.txt"
-    ]
-  }
-}
+```text
+Ask SushiMCP to read the documentation for Hono and Drizzle.
 ```
 
 ## Registration Args
