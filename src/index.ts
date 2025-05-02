@@ -3,49 +3,61 @@
 import { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import packageJson from '../package.json' with { type: 'json' };
-import { parseCliArgs } from './lib/cli.js';
 import {
   ServerRequest,
   ServerNotification,
 } from "@modelcontextprotocol/sdk/types.js";
 import {
+  list_llms_txt_sources,
   fetch_llms_txt,
   FetchLlmsTxtInputSchema,
-  sushi_digest,
-  SushiDigestInputSchema,
-} from "./tools/index.js";
-import { list_llms_txt_sources } from "./tools/list_llms_txt_sources.js";
+} from "#tools/index.js";
+import { parseCliArgs, getVersion } from "#lib/index.js";
 import { z } from "zod";
 
 // --- Parse CLI Arguments --- //
 const { docSources, allowedDomains } = parseCliArgs();
 
+// --- Determine Mode --- //
+const args = process.argv.slice(2);
+const isSseMode = args.includes("--sse");
+
+// --- Set Environment Variable --- //
+if (isSseMode) {
+  console.info("Detected --sse flag. Configuring for SSE mode.");
+} else {
+  process.env.MCP_STDIO_MODE = "silent";
+}
+
 // --- MCP Server Setup --- //
-const server = new McpServer({
-  name: "SushiMCP",
-  version: packageJson.version,
-  displayName: "SushiMCP",
-  description: "SushiMCP is a dev tools MCP Server designed to serve up context on a roll, just like your favorite restaurant.",
-  publisher: "Chris White <chris@chriswhite.rocks> https://chriswhite.rocks",
-},
-{
+const VERSION = getVersion();
+
+const server = new McpServer(
+  {
+    name: "sushimcp",
+    version: VERSION,
+    displayName: "sushimcp",
+    description:
+      "SushiMCP is an MCP Server designed to serve context on a roll.",
+    publisher: "Chris White <chris@chriswhite.rocks> https://chriswhite.rocks",
+  },
+  {
     capabilities: {
       tools: {
         list_llms_txt_sources: {
           name: "list_llms_txt_sources",
-          description: "Lists the source urls configured for llms.txt.",
+          description: "List the source urls where an llms.txt can be fetched.",
           annotations: {
-            title: "List registered llms.txt sources",
+            title: "List llms.txt sources",
             readOnlyHint: true,
             destructiveHint: false,
             idempotentHint: true,
             openWorldHint: false,
-          }
+          },
         },
         fetch_llms_txt: {
           name: "fetch_llms_txt",
-          description: "Fetches the content of a llms.txt source.",
+          description: "Fetches the content of a llms.txt url.",
           inputSchema: FetchLlmsTxtInputSchema,
           annotations: {
             title: "Fetch llms.txt content",
@@ -53,56 +65,42 @@ const server = new McpServer({
             destructiveHint: false,
             idempotentHint: true,
             openWorldHint: true,
-            }
-        },
-        sushi_digest: {
-          name: "sushi_digest",
-          description: "Generates a local pseudo-llms.txt for a GitHub project.",
-          inputSchema: SushiDigestInputSchema,
-          annotations: {
-            title: "Generate llms.txt for GitHub project.",
-            readOnlyHint: false,
-            destructiveHint: true,
-            idempotentHint: false,
-            openWorldHint: true,
-          }
+          },
         },
       },
     },
-  },);
+  }
+);
 
-// --- Register Tools --- //
-// Tool without parameters
 server.tool(
-  'list_llms_txt_sources',
+  "list_llms_txt_sources",
+  "List all available source urls where an llms.txt can be fetched. Multiple forms of llms.txt exist. Prefer to use llms.txt, but llms-full.txt and llms-mini.txt may also be available. If one form is suboptimal, check for others.",
   (extra: RequestHandlerExtra<ServerRequest, ServerNotification>) =>
     list_llms_txt_sources(extra, docSources)
 );
 
-// For the fetch_llms_txt tool - it can handle both object and array formats
 server.tool(
-  'fetch_llms_txt',
-  { url: z.string() },
-  (params: { url: string }, extra: RequestHandlerExtra<ServerRequest, ServerNotification>) =>
-    fetch_llms_txt(params, extra, allowedDomains)
-);
-
-// For the sushi_digest tool
-server.tool(
-  'sushi_digest',
-  { name: z.string() },
-  (params: { name: string; }, extra: RequestHandlerExtra<ServerRequest, ServerNotification>) =>
-    sushi_digest(params, extra)
+  "fetch_llms_txt",
+  "Fetches the content of one or more llms.txt urls.",
+  { input: FetchLlmsTxtInputSchema },
+  (
+    { input }: { input: z.infer<typeof FetchLlmsTxtInputSchema> },
+    extra: RequestHandlerExtra<ServerRequest, ServerNotification>
+  ) => fetch_llms_txt(input, extra, allowedDomains)
 );
 
 // --- Start Server --- //
-console.info("Starting SushiMCP...");
+if (process.env.MCP_STDIO_MODE !== "silent") {
+  console.info("Starting SushiMCP...");
+}
 try {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.info(
-    "SushiMCP started (stdio transport). Listening for MCP requests."
-  );
+  if (process.env.MCP_STDIO_MODE !== "silent") {
+    console.info(
+      "SushiMCP started (stdio transport). Listening for MCP requests."
+    );
+  }
 } catch (error: any) {
   console.error(`Failed to start MCP server: ${error.message}`);
   process.exit(1);

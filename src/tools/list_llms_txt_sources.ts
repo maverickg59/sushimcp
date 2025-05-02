@@ -6,6 +6,7 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 
+// --- List llms.txt Sources Tool ---
 export const list_llms_txt_sources = async (
   extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
   docSources: Record<string, string>

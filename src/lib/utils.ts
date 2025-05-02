@@ -1,6 +1,7 @@
 import { URL, fileURLToPath } from "url";
 import fs from "fs/promises";
 import path from "path";
+import { readFileSync } from "fs";
 
 // --- Type Definitions ---
 export type TargetInfo =
@@ -39,7 +40,9 @@ export function checkDomainAccess(
         `Access denied: Fetching from domain '${targetInfo.hostname}' is not allowed by server configuration.`
       );
     }
-    console.error(`Domain '${targetInfo.hostname}' is allowed.`); // Log to stderr
+    if (process.env.MCP_STDIO_MODE) {
+      console.error(`Domain '${targetInfo.hostname}' is allowed.`); // Log to stderr
+    }
   } else if (
     targetInfo.type === "localFileUrl" ||
     targetInfo.type === "localPath"
@@ -116,7 +119,9 @@ export async function parseFetchTarget(
 export async function fetchContent(targetInfo: TargetInfo): Promise<string> {
   switch (targetInfo.type) {
     case "remote": {
-      console.error(`Fetching remote URL: ${targetInfo.url.toString()}`); // Log to stderr
+      if (process.env.MCP_STDIO_MODE) {
+        console.error(`Fetching remote URL: ${targetInfo.url.toString()}`); // Log to stderr
+      }
       const response = await fetch(targetInfo.url.toString());
       if (!response.ok) throw new Error(`HTTP error ${response.status}`);
       return await response.text();
@@ -144,6 +149,21 @@ export async function fetchContent(targetInfo: TargetInfo): Promise<string> {
       );
     }
   }
+}
+
+// --- Utility Functions ---
+export function getVersion(): string {
+  const __filename = fileURLToPath(import.meta.url);
+  let dir = path.dirname(__filename);
+  for (let i = 0; i < 4; i++) {
+    const candidate = path.join(dir, "package.json");
+    try {
+      const pkg = JSON.parse(readFileSync(candidate, "utf-8"));
+      if (pkg.version) return pkg.version;
+    } catch {}
+    dir = path.dirname(dir);
+  }
+  return "unknown";
 }
 
 // Copyright (C) 2025 Christopher White

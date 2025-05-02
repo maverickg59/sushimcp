@@ -4,7 +4,9 @@
     "paths": {
       "@modelcontextprotocol/sdk": [
         "./node_modules/@modelcontextprotocol/sdk/dist/esm"
-      ]
+      ],
+      "#lib/*": ["./src/lib/*"],
+      "#tools/*": ["./src/tools/*"]
     },
     "target": "ES2022",
     "module": "NodeNext",

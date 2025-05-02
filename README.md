@@ -1,14 +1,25 @@
 # SushiMCP
 
-SushiMCP is a dev tools MCP Server designed to serve up context on a roll, just like your favorite restaurant.
+SushiMCP is an dev tools MCP Server designed to serve up context on a roll.
 
 ## Registering SushiMCP with an MCP Client
+
+**Minimal Config with default sources only:**
+
+```json
+{
+  "sushimcp": {
+    "command": "npx",
+    "args": ["@chriswhiterocks/sushimcp@latest"]
+  }
+}
+```
 
 **Config with custom sources combined using `--urls`:**
 
 ```json
 {
-  "SushiMCP": {
+  "sushimcp": {
     "command": "npx",
     "args": [
       "@chriswhiterocks/sushimcp@latest",
@@ -19,22 +30,11 @@ SushiMCP is a dev tools MCP Server designed to serve up context on a roll, just 
 }
 ```
 
-**Minimal Config with default sources only:**
-
-```json
-{
-  "SushiMCP": {
-    "command": "npx",
-    "args": ["@chriswhiterocks/sushimcp@latest"]
-  }
-}
-```
-
 **Config with custom sources one by one**
 
 ```json
 {
-  "SushiMCP": {
+  "sushimcp": {
     "command": "npx",
     "args": [
       "@chriswhiterocks/sushimcp@latest",
@@ -78,10 +78,78 @@ SushiMCP provides the following tools callable by a registered MCP client:
       ```
 
 2.  **`fetch_llms_txt`**:
+
     - **Description:** Fetches the content of a specific documentation source by its configured name.
-    - **Input:** JSON object with a `url` key specifying the source _name_ (e.g., `{"url": "drizzle"}`).
+    - **Input:**
+
+      1. JSON object with a `url` key specifying the source _url_:
+
+      - `{"url": "drizzle"}`
+
+      2. Array of source _urls_:
+
+      - `["drizzle", "hono"]`
+
     - **Output:** Text content of the fetched file.
     - **Security:** The server will enforce the `--allow-domain` rules for remote URLs.
+
+## Default Source List
+
+- hono: https://hono.dev/llms.txt
+- hono_full: https://hono.dev/llms-full.txt
+- drizzle: https://orm.drizzle.team/llms.txt
+- better-auth: https://better-auth.com/llms.txt
+- cloudflare: https://developers.cloudflare.com/llms.txt
+- cloudflare_full: https://developers.cloudflare.com/llms-full.txt
+- supabase: https://supabase.com/llms.txt
+- chakraui: https://chakra-ui.com/llms.txt
+- chakraui_full: https://chakra-ui.com/llms-full.txt
+- bun: https://bun.sh/llms.txt
+- bun_full: https://bun.sh/llms-full.txt
+- netlify: https://docs.netlify.com/llms.txt
+- prisma: https://www.prisma.io/docs/llms.txt
+- prisma_full: https://prisma.io/docs/llms-full.txt
+- ux-patterns: https://uxpatterns.dev/en/llms.txt
+- ux-patterns-full: https://uxpatterns.dev/en/llms-full.txt
+- vercel-ai-sdk: https://sdk.vercel.ai/llms.txt
+- dotenvx: https://dotenvx.com/llms.txt
+- dotenvx_full: https://dotenvx.com/llms-full.txt
+- elevenlabs: https://elevenlabs.io/docs/llms.txt
+- elevenlabs_full: https://elevenlabs.io/docs/llms-full.txt
+- svelte: https://svelte.dev/llms.txt
+- svelte_full: https://svelte.dev/llms-full.txt
+- turborepo: https://turborepo.com/llms.txt
+- anthropic: https://docs.anthropic.com/llms.txt
+- anthropic_full: https://docs.anthropic.com/llms-full.txt
+- windsurf: https://docs.windsurf.com/llms.txt
+- windsurf_full: https://docs.windsurf.com/llms-full.txt
+- cursor: https://docs.cursor.com/llms.txt
+- cursor_full: https://docs.cursor.com/llms-full.txt
+- tinybird: https://www.tinybird.co/docs/llms.txt
+- tinybird_full: https://www.tinybird.co/docs/llms-full.txt
+- turso: https://docs.turso.tech/llms.txt
+- turso_full: https://docs.turso.tech/llms-full.txt
+- wxt: https://wxt.dev/knowledge/docs.txt
+- cog: https://cog.run/llms.txt
+- fireproof: https://use-fireproof.com/llms.txt
+- fireproof_full: https://use-fireproof.com/llms-full.txt
+- fireproof_mini: https://use-fireproof.com/llms-mini.txt
+- likec4: https://likec4.dev/llms.txt
+- likec4_full: https://likec4.dev/llms-full.txt
+- navi: https://navi-lang.org/llms.txt
+- navi_full: https://navi-lang.org/llms-full.txt
+- openphone: https://www.openphone.com/docs/llms.txt
+- openphone_full: https://www.openphone.com/docs/llms-full.txt
+- openpipe: https://docs.openpipe.ai/llms.txt
+- openpipe_full: https://docs.openpipe.ai/llms-full.txt
+- roc-lang: https://roc-lang.org/llms.txt
+- sankey: https://sankeydiagram.net/llms.txt
+- daisyui: https://daisyui.com/llms.txt
+- open-alternative: https://openalternative.co/llms.txt
+- stripe: https://docs.stripe.com/llms.txt
+- ai-engineers-handbook: https://handbook.exemplar.dev/llms-full.txt
+- model-context-protocol: https://modelcontextprotocol.io/llms.txt
+- model-context-protocol_full: https://modelcontextprotocol.io/llms-full.txt
 
 ## Source Precedence
 
@@ -103,7 +171,7 @@ SushiMCP was born out of frustration with AI assistants generating outdated code
 
 Chris White
 
-[GitHub](https://github.com/maverickg59) | [Email](mailto:chris@chriswhite.rocks) | [Website](https://chriswhite.rocks) | [X](https://x.com/chriswhiterox) | [LinkedIn](https://www.linkedin.com/in/chrisewhite) | [Five9Cyber](https://www.fiv9cyber.com/)
+[GitHub](https://github.com/maverickg59) | [Email](mailto:chris@chriswhite.rocks) | [Discord](https://discord.com/users/1115027188840939560) | [Website](https://chriswhite.rocks) | [X](https://x.com/chriswhiterox) | [LinkedIn](https://www.linkedin.com/in/chrisewhite) | [Five9Cyber](https://www.fiv9cyber.com/)
 
 ## License
 

@@ -10,8 +10,9 @@ import {
   parseFetchTarget,
   fetchContent,
   checkDomainAccess,
-} from "../lib/utils.js";
+} from "#lib/index.js";
 
+// --- Fetch llms.txt Content Tool ---
 export const FetchLlmsTxtInputSchema = z.union([
   z.object({
     url: z
@@ -26,12 +27,16 @@ export const fetch_llms_txt = async (
   extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
   allowedDomains: Set<string>
 ): Promise<CallToolResult> => {
-  console.info(`Processing fetch_docs request with params:`, params);
+  if (process.env.MCP_STDIO_MODE !== "silent") {
+    console.info(`Processing fetch_docs request with params:`, params);
+  }
 
   try {
+    // Handle both input formats
     const urls = Array.isArray(params) ? params : [params.url];
     const results: TextContent[] = [];
 
+    // Process each URL
     for (const url of urls) {
       const targetInfo = await parseFetchTarget(url);
 
@@ -40,7 +45,9 @@ export const fetch_llms_txt = async (
       }
       checkDomainAccess(targetInfo, allowedDomains);
 
-      console.info(`Fetching content for: ${url}`);
+      if (process.env.MCP_STDIO_MODE !== "silent") {
+        console.info(`Fetching llms.txt from ${url}`);
+      }
       const fileContent = await fetchContent(targetInfo);
 
       results.push({
@@ -57,3 +64,6 @@ export const fetch_llms_txt = async (
     throw new Error(`Failed to process fetch request: ${error.message}`);
   }
 };
+
+// Copyright (C) 2025 Christopher White
+// SPDX-License-Identifier: AGPL-3.0-or-later
