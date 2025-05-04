@@ -1,6 +1,6 @@
 <div align="center">
 
-![SushiMCP Name Slogan Icon](assets/sushimcp_icon_name_slogan_logo.png)
+![SushiMCP Name Slogan Icon](assets/sushimcp_icon_name_slogan_logo_pink_bg.png)
 
 </div>
 
@@ -27,7 +27,9 @@ The SushiMCP dev tools MCP Server is designed to help your IDE agent find up-to-
 
 Update your global rules:
 
-- Use SushiMCP to fetch llms.txt documentation for any technology, package, or library requested via prompt.
+```text
+Use SushiMCP to fetch llms.txt documentation for any technology, package, or library requested via prompt.
+```
 
 Prompt your IDE agent to use SushiMCP:
 
