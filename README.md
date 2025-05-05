@@ -73,9 +73,9 @@ Ask SushiMCP to read the documentation for Hono and Drizzle.
 
 <br>
 
-## Available Tools (for MCP Client)
+## Available Tools
 
-SushiMCP provides the following tools callable by a registered MCP client:
+SushiMCP provides the following tools:
 
 1.  **`list_llms_txt_sources`**:
 
@@ -169,10 +169,11 @@ SushiMCP provides the following tools callable by a registered MCP client:
 The server loads and potentially overrides sources in the following order:
 
 1.  **Defaults:** If `--no-defaults` is **not** specified, internal default sources are loaded first.
+    <br>
 2.  **`--url` arguments:** Sources specified individually via `--url` are loaded next. If a name matches one from the defaults, the `--url` source **overrides** the default.
+    <br>
 3.  **`--urls` argument:** Sources specified via the `--urls` string are loaded last. If a name matches one from the defaults or a previous `--url` argument, the `--urls` source **overrides** it.
-
-<br>
+    <br>
 
 ## Development
 
@@ -188,9 +189,7 @@ SushiMCP was born out of frustration with AI assistants generating outdated code
 
 ## Author
 
-Chris White
-
-[GitHub](https://github.com/maverickg59) | [Email](mailto:chris@chriswhite.rocks) | [Discord](https://discord.com/users/1115027188840939560) | [Personal Site](https://chriswhite.rocks) | [X](https://x.com/chriswhiterox) | [LinkedIn](https://www.linkedin.com/in/chrisewhite) | [Five9 Cyber](https://www.fiv9cyber.com/)
+Chris White: [Email](mailto:chris@chriswhite.rocks) | [GitHub](https://github.com/maverickg59) | [Discord](https://discord.com/users/1115027188840939560) | [Personal Site](https://chriswhite.rocks) | [X](https://x.com/chriswhiterox) | [LinkedIn](https://www.linkedin.com/in/chrisewhite) | [Five9 Cyber](https://www.fiv9cyber.com/)
 
 <br>
 
