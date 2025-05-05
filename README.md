@@ -8,6 +8,8 @@
 
 The SushiMCP dev tools MCP Server is designed to help your IDE agent find up-to-date docs for the right project.
 
+<br>
+
 ## Registering SushiMCP with an MCP Client
 
 **Minimal Config with default sources only:**
@@ -23,19 +25,25 @@ The SushiMCP dev tools MCP Server is designed to help your IDE agent find up-to-
 
 [More in-depth examples config examples](assets/config_examples.md)
 
+<br>
+
 ## Using SushiMCP
 
 Update your global rules:
 
 ```text
-Use SushiMCP to fetch llms.txt documentation for any technology, package, or library requested via prompt.
+Use SushiMCP to fetch llms.txt documentation for any available technology, package, or library requested via prompt.
 ```
+
+OR
 
 Prompt your IDE agent to use SushiMCP:
 
 ```text
 Ask SushiMCP to read the documentation for Hono and Drizzle.
 ```
+
+<br>
 
 ## Registration Args
 
@@ -45,14 +53,25 @@ Ask SushiMCP to read the documentation for Hono and Drizzle.
   - `<url_or_path>`
     - URL (e.g., `https://hono.dev/llms.txt`) or _absolute_ local file path (e.g., `/path/to/project/llms.txt`).
     - **Note:** Relative paths might not work reliably when run via `npx` depending on the execution context; prefer absolute paths for local files.
+
+<br>
+
 - `--urls <string>`
   - Specify multiple sources as a single space-separated string (e.g., `"drizzle:URL1 hono:URL2"`).
+
+<br>
+
 - `--allow-domain <domain>`
   - Allows fetching from a specific domain (repeatable).
   - Defaults to domains in remote `--url`/`--urls` sources if omitted.
   - Use `*` to allow all. (NOT RECOMMENDED)
+
+<br>
+
 - `--no-defaults`
   - (Flag) Disables loading a sensible set of Node/TypeScript ecosystem default sources from.
+
+<br>
 
 ## Available Tools (for MCP Client)
 
@@ -66,6 +85,8 @@ SushiMCP provides the following tools callable by a registered MCP client:
       ```json
       ["drizzle", "hono", "mylocal"]
       ```
+
+<br>
 
 2.  **`fetch_llms_txt`**:
 
@@ -82,6 +103,8 @@ SushiMCP provides the following tools callable by a registered MCP client:
 
     - **Output:** Text content of the fetched file.
     - **Security:** The server will enforce the `--allow-domain` rules for remote URLs.
+
+<br>
 
 ## Default Source List
 
@@ -149,19 +172,27 @@ The server loads and potentially overrides sources in the following order:
 2.  **`--url` arguments:** Sources specified individually via `--url` are loaded next. If a name matches one from the defaults, the `--url` source **overrides** the default.
 3.  **`--urls` argument:** Sources specified via the `--urls` string are loaded last. If a name matches one from the defaults or a previous `--url` argument, the `--urls` source **overrides** it.
 
+<br>
+
 ## Development
 
 This project is not open for contibutions at the moment, but feel free to fork and extend the project under the terms of the AGPL-3.0-or-later license.
+
+<br>
 
 ## Inspiration
 
 SushiMCP was born out of frustration with AI assistants generating outdated code. While searching for an MCP that could retrieve llms.txt, I found mcpdoc by LangChain AI. I built a devtools-focused MCP server using their structure, with list_llms_txt_sources and fetch_llms_text tools inspired by it. Thanks, LangChain.
 
+<br>
+
 ## Author
 
 Chris White
 
-[GitHub](https://github.com/maverickg59) | [Email](mailto:chris@chriswhite.rocks) | [Discord](https://discord.com/users/1115027188840939560) | [Website](https://chriswhite.rocks) | [X](https://x.com/chriswhiterox) | [LinkedIn](https://www.linkedin.com/in/chrisewhite) | [Five9 Cyber](https://www.fiv9cyber.com/)
+[GitHub](https://github.com/maverickg59) | [Email](mailto:chris@chriswhite.rocks) | [Discord](https://discord.com/users/1115027188840939560) | [Personal Site](https://chriswhite.rocks) | [X](https://x.com/chriswhiterox) | [LinkedIn](https://www.linkedin.com/in/chrisewhite) | [Five9 Cyber](https://www.fiv9cyber.com/)
+
+<br>
 
 ## License
 
