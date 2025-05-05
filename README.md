@@ -169,11 +169,16 @@ SushiMCP provides the following tools:
 The server loads and potentially overrides sources in the following order:
 
 1.  **Defaults:** If `--no-defaults` is **not** specified, internal default sources are loaded first.
-    <br>
+
+<br>
+
 2.  **`--url` arguments:** Sources specified individually via `--url` are loaded next. If a name matches one from the defaults, the `--url` source **overrides** the default.
-    <br>
+
+<br>
+
 3.  **`--urls` argument:** Sources specified via the `--urls` string are loaded last. If a name matches one from the defaults or a previous `--url` argument, the `--urls` source **overrides** it.
-    <br>
+
+<br>
 
 ## Development
 
