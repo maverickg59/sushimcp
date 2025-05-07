@@ -74,7 +74,7 @@ const server = new McpServer(
 
 server.tool(
   "list_llms_txt_sources",
-  "This tool lists all available source urls where an llms.txt can be fetched. After reading the listed sources, use fetch_llms_txt to fetch any source that matches a technology in the instructions you received. Prefer llms.txt, but if llms.txt. When done, ask the user if they want to use non-MCP tools to search for documentation on any sources this tool could not find.",
+  "This tool lists all available source urls where an llms.txt can be fetched. After reading the listed sources, use fetch_llms_txt to fetch any source that matches a technology in the instructions you received. Prefer llms.txt, but if llms.txt proves inadequate, check to see if other llms-full.txt or llms-mini.txt exist. When done, ask the user if they want to use non-MCP tools to search for documentation on any sources this tool could not find.",
   (extra: RequestHandlerExtra<ServerRequest, ServerNotification>) =>
     list_llms_txt_sources(extra, docSources)
 );

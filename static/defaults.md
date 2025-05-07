@@ -53,3 +53,5 @@
 - ai-engineers-handbook: https://handbook.exemplar.dev/llms-full.txt
 - model-context-protocol: https://modelcontextprotocol.io/llms.txt
 - model-context-protocol_full: https://modelcontextprotocol.io/llms-full.txt
+- fumadocs: https://fumadocs.dev/llms.txt
+- fumadocs-full: https://fumadocs.dev/llms-full.txt
