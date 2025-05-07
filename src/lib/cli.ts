@@ -186,7 +186,7 @@ export function parseCliArgs(): CliConfig {
   program
     .name("SushiMCP")
     .description(
-      "Starts SushiMCP, a dev tools MCP Server designed to serve up context on a roll, just like your favorite restaurant."
+      "Starts SushiMCP, a dev tools model context protocol server that serves context on a roll."
     )
     .version(VERSION)
     .option(

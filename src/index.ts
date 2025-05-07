@@ -38,7 +38,7 @@ const server = new McpServer(
     version: VERSION,
     displayName: "SushiMCP",
     description:
-      "SushiMCP is an MCP Server designed to serve context on a roll.",
+      "SushiMCP a dev tools model context protocol server that serves context on a roll.",
     publisher: "Chris White <chris@chriswhite.rocks> https://chriswhite.rocks",
   },
   {

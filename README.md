@@ -6,7 +6,7 @@
 
 # SushiMCP
 
-The SushiMCP dev tools MCP Server is designed to help your IDE agent find up-to-date docs for the right project.
+SushiMCP a dev tools model context protocol server that serves context on a roll.
 
 <br>
 
