@@ -1,18 +1,16 @@
 <div align="center">
 
-![SushiMCP Name Slogan Icon](assets/sushimcp_icon_name_slogan_logo_pink_bg.png)
+![SushiMCP Hero Icon](assets/sushimcp_icon_name_slogan_logo_pink_bg.png)
 
 </div>
 
 # SushiMCP
 
-SushiMCP a dev tools model context protocol server that serves context on a roll.
+SushiMCP is a model context protocol server designed to assist developers with delivering context to their AI IDE's. It's simple to use and massively improves the performance of base and premium LLM models when generating code.
 
 <br>
 
 ## Registering SushiMCP with an MCP Client
-
-**Minimal Config with default sources only:**
 
 ```json
 {
@@ -23,160 +21,11 @@ SushiMCP a dev tools model context protocol server that serves context on a roll
 }
 ```
 
-[More in-depth examples config examples](assets/config_examples.md)
-
 <br>
 
-## Using SushiMCP
+## Advanced Configuration & Deeper Learning
 
-Update your global rules:
-
-```text
-Use SushiMCP to fetch llms.txt documentation for any available technology, package, or library requested via prompt.
-```
-
-OR
-
-Prompt your IDE agent to use SushiMCP:
-
-```text
-Ask SushiMCP to read the documentation for Hono and Drizzle.
-```
-
-<br>
-
-## Registration Args
-
-- `--url <name:url_or_path>` (Repeatable)
-  - Registers a documentation source.
-  - `<name>`: A short identifier (e.g., `HonoDocs`).
-  - `<url_or_path>`
-    - URL (e.g., `https://hono.dev/llms.txt`) or _absolute_ local file path (e.g., `/path/to/project/llms.txt`).
-    - **Note:** Relative paths might not work reliably when run via `npx` depending on the execution context; prefer absolute paths for local files.
-
-<br>
-
-- `--urls <string>`
-  - Specify multiple sources as a single space-separated string (e.g., `"drizzle:URL1 hono:URL2"`).
-
-<br>
-
-- `--allow-domain <domain>`
-  - Allows fetching from a specific domain (repeatable).
-  - Defaults to domains in remote `--url`/`--urls` sources if omitted.
-  - Use `*` to allow all. (NOT RECOMMENDED)
-
-<br>
-
-- `--no-defaults`
-  - (Flag) Disables loading a sensible set of Node/TypeScript ecosystem default sources from.
-
-<br>
-
-## Available Tools
-
-SushiMCP provides the following tools:
-
-1.  **`list_llms_txt_sources`**:
-
-    - **Description:** Lists the names of all configured documentation sources.
-    - **Input:** None.
-    - **Output:** JSON array of source names (strings).
-      ```json
-      ["drizzle", "hono", "mylocal"]
-      ```
-
-<br>
-
-2.  **`fetch_llms_txt`**:
-
-    - **Description:** Fetches the content of a specific documentation source by its configured name.
-    - **Input:**
-
-      1. JSON object with a `url` key specifying the source _url_:
-
-      - `{"url": "drizzle"}`
-
-      2. Array of source _urls_:
-
-      - `["drizzle", "hono"]`
-
-    - **Output:** Text content of the fetched file.
-    - **Security:** The server will enforce the `--allow-domain` rules for remote URLs.
-
-<br>
-
-## Default Source List
-
-- hono: https://hono.dev/llms.txt
-- hono_full: https://hono.dev/llms-full.txt
-- drizzle: https://orm.drizzle.team/llms.txt
-- better-auth: https://better-auth.com/llms.txt
-- cloudflare: https://developers.cloudflare.com/llms.txt
-- cloudflare_full: https://developers.cloudflare.com/llms-full.txt
-- supabase: https://supabase.com/llms.txt
-- chakraui: https://chakra-ui.com/llms.txt
-- chakraui_full: https://chakra-ui.com/llms-full.txt
-- bun: https://bun.sh/llms.txt
-- bun_full: https://bun.sh/llms-full.txt
-- netlify: https://docs.netlify.com/llms.txt
-- prisma: https://www.prisma.io/docs/llms.txt
-- prisma_full: https://prisma.io/docs/llms-full.txt
-- ux-patterns: https://uxpatterns.dev/en/llms.txt
-- ux-patterns-full: https://uxpatterns.dev/en/llms-full.txt
-- vercel-ai-sdk: https://sdk.vercel.ai/llms.txt
-- dotenvx: https://dotenvx.com/llms.txt
-- dotenvx_full: https://dotenvx.com/llms-full.txt
-- elevenlabs: https://elevenlabs.io/docs/llms.txt
-- elevenlabs_full: https://elevenlabs.io/docs/llms-full.txt
-- svelte: https://svelte.dev/llms.txt
-- svelte_full: https://svelte.dev/llms-full.txt
-- turborepo: https://turborepo.com/llms.txt
-- anthropic: https://docs.anthropic.com/llms.txt
-- anthropic_full: https://docs.anthropic.com/llms-full.txt
-- windsurf: https://docs.windsurf.com/llms.txt
-- windsurf_full: https://docs.windsurf.com/llms-full.txt
-- cursor: https://docs.cursor.com/llms.txt
-- cursor_full: https://docs.cursor.com/llms-full.txt
-- tinybird: https://www.tinybird.co/docs/llms.txt
-- tinybird_full: https://www.tinybird.co/docs/llms-full.txt
-- turso: https://docs.turso.tech/llms.txt
-- turso_full: https://docs.turso.tech/llms-full.txt
-- wxt: https://wxt.dev/knowledge/docs.txt
-- cog: https://cog.run/llms.txt
-- fireproof: https://use-fireproof.com/llms.txt
-- fireproof_full: https://use-fireproof.com/llms-full.txt
-- fireproof_mini: https://use-fireproof.com/llms-mini.txt
-- likec4: https://likec4.dev/llms.txt
-- likec4_full: https://likec4.dev/llms-full.txt
-- navi: https://navi-lang.org/llms.txt
-- navi_full: https://navi-lang.org/llms-full.txt
-- openphone: https://www.openphone.com/docs/llms.txt
-- openphone_full: https://www.openphone.com/docs/llms-full.txt
-- openpipe: https://docs.openpipe.ai/llms.txt
-- openpipe_full: https://docs.openpipe.ai/llms-full.txt
-- roc-lang: https://roc-lang.org/llms.txt
-- sankey: https://sankeydiagram.net/llms.txt
-- daisyui: https://daisyui.com/llms.txt
-- open-alternative: https://openalternative.co/llms.txt
-- stripe: https://docs.stripe.com/llms.txt
-- ai-engineers-handbook: https://handbook.exemplar.dev/llms-full.txt
-- model-context-protocol: https://modelcontextprotocol.io/llms.txt
-- model-context-protocol_full: https://modelcontextprotocol.io/llms-full.txt
-
-## Source Precedence
-
-The server loads and potentially overrides sources in the following order:
-
-1.  **Defaults:** If `--no-defaults` is **not** specified, internal default sources are loaded first.
-
-<br>
-
-2.  **`--url` arguments:** Sources specified individually via `--url` are loaded next. If a name matches one from the defaults, the `--url` source **overrides** the default.
-
-<br>
-
-3.  **`--urls` argument:** Sources specified via the `--urls` string are loaded last. If a name matches one from the defaults or a previous `--url` argument, the `--urls` source **overrides** it.
+Visit the [SushiMCP Docs](https://docs.sushimcp.com) for more information on advanced configuration and deeper learning about SushiMCP.
 
 <br>
 
