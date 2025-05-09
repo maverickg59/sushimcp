@@ -6,7 +6,7 @@
 
 # SushiMCP
 
-SushiMCP is a model context protocol server designed to assist developers with delivering context to their AI IDE's. It's simple to use and massively improves the performance of base and premium LLM models when generating code.
+SushiMCP is a model context protocol server designed to assist developers with delivering context to their AI IDE's. It's simple to use and massively improves the performance of base and premium LLM models when generating code. The easiest way to get started is by registering SushiMCP with your client using the default configuration:
 
 <br>
 
