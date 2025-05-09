@@ -29,18 +29,6 @@ Visit the [SushiMCP Docs](https://docs.sushimcp.com) for more information on adv
 
 <br>
 
-## Development
-
-This project is not open for contibutions at the moment, but feel free to fork and extend the project under the terms of the AGPL-3.0-or-later license.
-
-<br>
-
-## Inspiration
-
-SushiMCP was born out of frustration with AI assistants generating outdated code. While searching for an MCP that could retrieve llms.txt, I found mcpdoc by LangChain AI. I built a devtools-focused MCP server using their structure, with list_llms_txt_sources and fetch_llms_text tools inspired by it. Thanks, LangChain.
-
-<br>
-
 ## Author
 
 Chris White: [Email](mailto:chris@chriswhite.rocks) | [GitHub](https://github.com/maverickg59) | [Discord](https://discord.com/users/1115027188840939560) | [Personal Site](https://chriswhite.rocks) | [X](https://x.com/chriswhiterox) | [LinkedIn](https://www.linkedin.com/in/chrisewhite) | [Five9 Cyber](https://www.fiv9cyber.com/)

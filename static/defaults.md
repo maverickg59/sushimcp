@@ -53,3 +53,9 @@
 - model_context_protocol_full: https://modelcontextprotocol.io/llms-full.txt
 - fumadocs: https://fumadocs.dev/llms.txt
 - fumadocs_full: https://fumadocs.dev/llms-full.txt
+- langgraph_python: https://langchain-ai.github.io/langgraph/llms.txt
+- langgraph_python_full: https://langchain-ai.github.io/langgraph/llms-full.txt
+- langgraph_js: https://langchain-ai.github.io/langgraphjs/llms.txt
+- langgraph_js_full: https://langchain-ai.github.io/langgraphjs/llms-full.txt
+- langchain_python: https://python.langchain.com/llms.txt
+- langchain_js: https://js.langchain.com/llms.txt
