@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/maverickg59-sushimcp-badge.png)](https://mseep.ai/app/maverickg59-sushimcp)
+
 <div align="center">
 
 ![SushiMCP Hero Icon](assets/sushimcp_icon_name_slogan_logo_pink_bg.png)
