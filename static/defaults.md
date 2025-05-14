@@ -59,3 +59,5 @@
 - langgraph_js_full: https://langchain-ai.github.io/langgraphjs/llms-full.txt
 - langchain_python: https://python.langchain.com/llms.txt
 - langchain_js: https://js.langchain.com/llms.txt
+- mastra: https://mastra.ai/llms.txt
+- mastra_full: https://mastra.ai/llms-full.txt
