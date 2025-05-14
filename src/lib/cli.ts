@@ -22,7 +22,8 @@ export interface CliConfig {
 }
 
 // Source loading functions
-function loadDefaultSources(defaultsPath: string): Record<string, string> {
+/** @internal */
+export function loadDefaultSources(defaultsPath: string): Record<string, string> {
   const defaultSources: Record<string, string> = {};
   try {
     const defaultsContent = fs.readFileSync(defaultsPath, "utf-8");
@@ -48,7 +49,8 @@ function loadDefaultSources(defaultsPath: string): Record<string, string> {
 }
 
 // Process different source types
-function processSourceOptions(
+/** @internal */
+export function processSourceOptions(
   sources: Record<string, string>,
   singleOptions: string[] | undefined,
   singleFlagName: string,
@@ -81,7 +83,8 @@ function processSourceOptions(
   return sources;
 }
 
-function processDomainOptions(
+/** @internal */
+export function processDomainOptions(
   allowDomainOptions: string[] | undefined,
   allowDomainsOption: string | undefined,
   docSources: Record<string, string>
@@ -114,7 +117,8 @@ function processDomainOptions(
   return allowedDomains;
 }
 
-function inferDomainsFromSources(
+/** @internal */
+export function inferDomainsFromSources(
   sources: Record<string, string>,
   allowedDomains: Set<string>
 ): void {
@@ -147,7 +151,8 @@ function inferDomainsFromSources(
 }
 
 // Main option processing functions
-function getDocSources(
+/** @internal */
+export function getDocSources(
   options: OptionValues,
   includeDefaults: boolean
 ): Record<string, string> {
@@ -177,7 +182,8 @@ function getDocSources(
   return docSources;
 }
 
-function getOpenApiSpecs(
+/** @internal */
+export function getOpenApiSpecs(
   options: OptionValues,
   includeDefaults: boolean
 ): Record<string, string> {
