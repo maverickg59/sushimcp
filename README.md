@@ -1,6 +1,6 @@
 <div align="center">
 
-![SushiMCP Hero Icon](assets/sushimcp_icon_name_slogan_logo_pink_bg.png)
+![SushiMCP Hero Icon](https://github.com/maverickg59/sushimcp/raw/prod/assets/sushimcp_icon_name_slogan_logo_pink_bg.png)
 
 </div>
 
