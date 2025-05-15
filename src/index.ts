@@ -11,23 +11,23 @@ import {
   list_llms_txt_sources,
   fetch_llms_txt,
   FetchLlmsTxtInputSchema,
-  fetch_open_api_spec,
+  fetch_openapi_spec,
   FetchOpenApiSpecInputSchema,
-  list_api_spec_sources,
+  list_openapi_spec_sources,
 } from "#tools/index.js";
 import { parseCliArgs, getVersion } from "#lib/index.js";
 import { z } from "zod";
-
-// /Users/christopherwhite/Develop/projects/sushimcp/sushimcp/dist/index.js --allow-domain http://localhost:8787 --openapi-spec-source http://localhost:8787/api/v1/openapi.json
 
 // --- Parse CLI Arguments --- //
 const { docSources, allowedDomains, openApiSpecs } = parseCliArgs();
 
 // --- Determine Mode --- //
+// not currently in use, but in place for potential future use
 const args = process.argv.slice(2);
 const isSseMode = args.includes("--sse");
 
 // --- Set Environment Variable --- //
+// not currently in use, but in place for potential future use
 if (isSseMode) {
   console.info("Detected --sse flag. Configuring for SSE mode.");
 } else {
@@ -60,8 +60,8 @@ const server = new McpServer(
             openWorldHint: false,
           },
         },
-        list_api_spec_sources: {
-          name: "list_api_spec_sources",
+        list_openapi_spec_sources: {
+          name: "list_openapi_spec_sources",
           description:
             "List the source urls where an OpenAPI spec can be fetched.",
           annotations: {
@@ -109,10 +109,10 @@ server.tool(
 );
 
 server.tool(
-  "list_api_spec_sources",
+  "list_openapi_spec_sources",
   "This tool lists all available source urls where an OpenAPI spec can be fetched.",
   (extra: RequestHandlerExtra<ServerRequest, ServerNotification>) =>
-    list_api_spec_sources(extra, openApiSpecs)
+    list_openapi_spec_sources(extra, openApiSpecs)
 );
 
 server.tool(
@@ -126,27 +126,24 @@ server.tool(
 );
 
 server.tool(
-  "fetch_open_api_spec",
+  "fetch_openapi_spec",
   "Fetches the content of one or more OpenAPI spec urls.",
   { input: FetchOpenApiSpecInputSchema },
   (
     { input }: { input: z.infer<typeof FetchOpenApiSpecInputSchema> },
     extra: RequestHandlerExtra<ServerRequest, ServerNotification>
-  ) => fetch_open_api_spec(input, extra, allowedDomains)
+  ) => fetch_openapi_spec(input, extra, allowedDomains)
 );
 
 // --- Start Server --- //
-if (process.env.MCP_STDIO_MODE !== "silent") {
-  console.info("Starting SushiMCP...");
-}
+
+console.info("Starting SushiMCP...");
 try {
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  if (process.env.MCP_STDIO_MODE !== "silent") {
-    console.info(
-      "SushiMCP started (stdio transport). Listening for MCP requests."
-    );
-  }
+  console.info(
+    "SushiMCP started (stdio transport). Listening for MCP requests."
+  );
 } catch (error: any) {
   console.error(`Failed to start MCP server: ${error.message}`);
   process.exit(1);

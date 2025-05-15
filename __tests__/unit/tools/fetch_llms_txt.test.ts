@@ -6,6 +6,11 @@ import type {
   ServerRequest,
   ServerNotification,
 } from "@modelcontextprotocol/sdk/types.js";
+import {
+  consoleErrorSpy,
+  consoleInfoSpy,
+  resetAllMocks,
+} from "../../test-utils";
 
 vi.mock("#lib/utils", async () => {
   const actual = await vi.importActual("#lib/utils");
@@ -18,13 +23,6 @@ vi.mock("#lib/utils", async () => {
 });
 
 describe("fetch_llms_txt", () => {
-  const mockConsoleInfo = vi
-    .spyOn(console, "info")
-    .mockImplementation(() => {});
-  const mockConsoleError = vi
-    .spyOn(console, "error")
-    .mockImplementation(() => {});
-
   const mockExtra = {} as RequestHandlerExtra<
     ServerRequest,
     ServerNotification
@@ -34,9 +32,8 @@ describe("fetch_llms_txt", () => {
   const originalEnv = process.env;
 
   beforeEach(() => {
-    vi.resetAllMocks();
+    resetAllMocks();
     process.env = { ...originalEnv };
-    process.env.MCP_STDIO_MODE = "silent";
   });
 
   afterEach(() => {
@@ -63,6 +60,13 @@ describe("fetch_llms_txt", () => {
 
     expect(utils.parseFetchTarget).toHaveBeenCalledWith(
       "https://example.com/llms.txt"
+    );
+    expect(consoleInfoSpy).toHaveBeenCalledWith(
+      "Processing fetch_llms_txt request with params:",
+      { url: "https://example.com/llms.txt" }
+    );
+    expect(consoleInfoSpy).toHaveBeenCalledWith(
+      "Fetching llms.txt from https://example.com/llms.txt"
     );
     expect(utils.checkDomainAccess).toHaveBeenCalledWith(
       mockTargetInfo,
@@ -118,9 +122,7 @@ describe("fetch_llms_txt", () => {
     });
   });
 
-  it("should log to console when MCP_STDIO_MODE is not silent", async () => {
-    process.env.MCP_STDIO_MODE = "verbose";
-
+  it("should log when fetching llms.txt", async () => {
     const mockTargetInfo = {
       type: "remote" as const,
       url: new URL("https://example.com/llms.txt"),
@@ -136,11 +138,11 @@ describe("fetch_llms_txt", () => {
       mockAllowedDomains
     );
 
-    expect(mockConsoleInfo).toHaveBeenCalledWith(
-      expect.stringContaining("Processing fetch_docs request with params:"),
+    expect(consoleInfoSpy).toHaveBeenCalledWith(
+      expect.stringContaining("Processing fetch_llms_txt request with params:"),
       expect.anything()
     );
-    expect(mockConsoleInfo).toHaveBeenCalledWith(
+    expect(consoleInfoSpy).toHaveBeenCalledWith(
       expect.stringContaining(
         "Fetching llms.txt from https://example.com/llms.txt"
       )
@@ -187,7 +189,7 @@ describe("fetch_llms_txt", () => {
       )
     ).rejects.toThrow("Failed to process fetch request: Access denied");
 
-    expect(mockConsoleError).toHaveBeenCalled();
+    expect(consoleErrorSpy).toHaveBeenCalled();
   });
 
   it("should handle content fetch failures", async () => {
@@ -210,6 +212,9 @@ describe("fetch_llms_txt", () => {
       )
     ).rejects.toThrow("Failed to process fetch request: HTTP error 404");
 
-    expect(mockConsoleError).toHaveBeenCalled();
+    expect(consoleErrorSpy).toHaveBeenCalled();
   });
 });
+
+// Copyright (C) 2025 Christopher White
+// SPDX-License-Identifier: AGPL-3.0-or-later

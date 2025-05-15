@@ -128,6 +128,8 @@ describe("CLI Internal Functions", () => {
       const result = cliModule.processDomainOptions(
         allowDomainOptions,
         undefined,
+        undefined,
+        undefined,
         docSources,
         openApiSpecs
       );
@@ -144,6 +146,8 @@ describe("CLI Internal Functions", () => {
 
       const result = cliModule.processDomainOptions(
         allowDomainOptions,
+        undefined,
+        undefined,
         undefined,
         docSources,
         openApiSpecs
@@ -178,3 +182,6 @@ describe("CLI Internal Functions", () => {
     });
   });
 });
+
+// Copyright (C) 2025 Christopher White
+// SPDX-License-Identifier: AGPL-3.0-or-later

@@ -12,7 +12,7 @@ import {
   checkDomainAccess,
 } from "#lib/index.js";
 
-// --- Fetch llms.txt Content Tool ---
+// --- Fetch OpenAPI Spec Content Tool ---
 export const FetchOpenApiSpecInputSchema = z.union([
   z.object({
     url: z
@@ -22,14 +22,12 @@ export const FetchOpenApiSpecInputSchema = z.union([
   z.array(z.string().url("Each array item must be a valid URL string")),
 ]);
 
-export const fetch_open_api_spec = async (
+export const fetch_openapi_spec = async (
   params: z.infer<typeof FetchOpenApiSpecInputSchema>,
   extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
   allowedDomains: Set<string>
 ): Promise<CallToolResult> => {
-  if (process.env.MCP_STDIO_MODE !== "silent") {
-    console.info(`Processing fetch_open_api_spec request with params:`, params);
-  }
+  console.info(`Processing fetch_openapi_spec request with params:`, params);
 
   try {
     // Handle both input formats
@@ -43,11 +41,11 @@ export const fetch_open_api_spec = async (
       if (targetInfo.type === "unsupported") {
         throw new Error(`For URL ${url}: ${targetInfo.reason}`);
       }
+
       checkDomainAccess(targetInfo, allowedDomains);
 
-      if (process.env.MCP_STDIO_MODE !== "silent") {
-        console.info(`Fetching OpenAPI spec from ${url}`);
-      }
+      console.info(`Fetching OpenAPI spec from ${url}`);
+
       const fileContent = await fetchContent(targetInfo);
 
       results.push({
@@ -60,7 +58,7 @@ export const fetch_open_api_spec = async (
       content: results,
     };
   } catch (error: any) {
-    console.error(`Error in fetch_docs: ${error.message}`);
+    console.error(`Error in fetch_openapi_spec: ${error.message}`);
     throw new Error(`Failed to process fetch request: ${error.message}`);
   }
 };

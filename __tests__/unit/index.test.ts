@@ -22,7 +22,6 @@ describe("Entry Point File", () => {
       expect(indexContent).toContain("McpServer");
       expect(indexContent).toContain("list_llms_txt_sources");
       expect(indexContent).toContain("fetch_llms_txt");
-      expect(indexContent).toContain("process.env.MCP_STDIO_MODE");
       expect(indexContent).toContain("StdioServerTransport");
       expect(indexContent).toContain("server.connect");
     }
@@ -51,3 +50,6 @@ describe("Entry Point File", () => {
     }
   });
 });
+
+// Copyright (C) 2025 Christopher White
+// SPDX-License-Identifier: AGPL-3.0-or-later

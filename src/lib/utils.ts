@@ -37,17 +37,15 @@ export function checkDomainAccess(
         }' is not in the allowed list: ${[...allowedDomains].join(", ")}`
       );
       throw new Error(
-        `Access denied: Fetching from domain '${targetInfo.hostname}' is not allowed by server configuration.`
+        `Access denied: Fetching from domain '${targetInfo.hostname}' is not allowed by server configuration. Ask user to add domain to allow list.`
       );
     }
-    if (process.env.MCP_STDIO_MODE) {
-      console.error(`Domain '${targetInfo.hostname}' is allowed.`); // Log to stderr
-    }
+    console.info(`Domain '${targetInfo.hostname}' is allowed.`);
   } else if (
     targetInfo.type === "localFileUrl" ||
     targetInfo.type === "localPath"
   ) {
-    console.error("Local file access permitted.");
+    console.warn("Local file access permitted.");
   } else {
     throw new Error(
       `Internal error: Unsupported target type '${targetInfo.type}' during access check.`
@@ -119,21 +117,19 @@ export async function parseFetchTarget(
 export async function fetchContent(targetInfo: TargetInfo): Promise<string> {
   switch (targetInfo.type) {
     case "remote": {
-      if (process.env.MCP_STDIO_MODE) {
-        console.error(`Fetching remote URL: ${targetInfo.url.toString()}`); // Log to stderr
-      }
+      console.info(`Fetching remote URL: ${targetInfo.url.toString()}`);
       const response = await fetch(targetInfo.url.toString());
       if (!response.ok) throw new Error(`HTTP error ${response.status}`);
       return await response.text();
     }
     case "localFileUrl":
-      console.error(
-        `Reading local file path from file: URL: ${targetInfo.filePath}` // Log to stderr
+      console.info(
+        `Reading local file path from file: URL: ${targetInfo.filePath}`
       );
       return await fs.readFile(targetInfo.filePath, "utf-8");
     case "localPath":
-      console.error(
-        `Reading local file path directly: ${targetInfo.resolvedPath}` // Log to stderr
+      console.info(
+        `Reading local file path directly: ${targetInfo.resolvedPath}`
       );
       return await fs.readFile(targetInfo.resolvedPath, "utf-8");
     case "unsupported":

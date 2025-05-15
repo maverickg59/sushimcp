@@ -8,35 +8,18 @@ import {
   processMultipleItems,
 } from "#lib/cli_lib";
 import type { CliConfig } from "#lib/cli";
-
-vi.mock("#lib/cli_lib", async () => {
-  const actual = await vi.importActual<typeof import("#lib/cli_lib")>(
-    "#lib/cli_lib"
-  );
-
-  const mockLogConfigSummary = vi.fn((config) => {
-    if (process.env.MCP_STDIO_MODE === "test-silent") {
-      return;
-    }
-    return actual.logConfigSummary(config);
-  });
-
-  return {
-    ...actual,
-    logConfigSummary: mockLogConfigSummary,
-  };
-});
+import {
+  consoleErrorSpy,
+  consoleWarnSpy,
+  consoleInfoSpy,
+  resetAllMocks,
+} from "../../test-utils";
 
 describe("CLI Library Utilities", () => {
-  const consoleErrorSpy = vi
-    .spyOn(console, "error")
-    .mockImplementation(() => {});
-  const consoleInfoSpy = vi.spyOn(console, "info").mockImplementation(() => {});
-
   const originalEnv = process.env;
 
   beforeEach(() => {
-    vi.resetAllMocks();
+    resetAllMocks();
     process.env = { ...originalEnv };
   });
 
@@ -212,15 +195,15 @@ describe("CLI Library Utilities", () => {
       normalizeAndAddDomain("", domains, "--allow-domain");
 
       expect(domains.size).toBe(0);
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
         "Skipping empty --allow-domain entry."
       );
     });
   });
 
   describe("logConfigSummary", () => {
-    it("should log config summary when MCP_STDIO_MODE is not silent", () => {
-      process.env.MCP_STDIO_MODE = "verbose";
+    it("should log config summary", () => {
+      // Clear any previous calls
       consoleInfoSpy.mockClear();
 
       const config: CliConfig = {
@@ -231,24 +214,40 @@ describe("CLI Library Utilities", () => {
 
       logConfigSummary(config);
 
+      // Verify the summary was logged with the expected content
       expect(consoleInfoSpy).toHaveBeenCalled();
 
-      expect(consoleInfoSpy).toHaveBeenCalledTimes(5);
-    });
+      // Get all calls to console.info
+      const calls = consoleInfoSpy.mock.calls.map((call) => call[0]);
 
-    it("should not log when MCP_STDIO_MODE is silent", () => {
-      consoleInfoSpy.mockClear();
-      process.env.MCP_STDIO_MODE = "test-silent";
+      // Check if the expected strings are included in any of the calls
+      expect(
+        calls.some(
+          (call) =>
+            typeof call === "string" &&
+            call.includes("SushiMCP Configuration Summary")
+        )
+      ).toBe(true);
 
-      const config: CliConfig = {
-        docSources: { typescript: "https://example.com/typescript/llms.txt" },
-        allowedDomains: new Set(["example.com"]),
-        openApiSpecs: {},
-      };
+      expect(
+        calls.some(
+          (call) =>
+            typeof call === "string" && call.includes("Documentation Sources:")
+        )
+      ).toBe(true);
 
-      logConfigSummary(config);
+      expect(
+        calls.some(
+          (call) => typeof call === "string" && call.includes("OpenAPI Specs:")
+        )
+      ).toBe(true);
 
-      expect(consoleInfoSpy).not.toHaveBeenCalled();
+      expect(
+        calls.some(
+          (call) =>
+            typeof call === "string" && call.includes("Allowed Fetch Domains:")
+        )
+      ).toBe(true);
     });
   });
 
@@ -326,3 +325,6 @@ describe("CLI Library Utilities", () => {
     });
   });
 });
+
+// Copyright (C) 2025 Christopher White
+// SPDX-License-Identifier: AGPL-3.0-or-later

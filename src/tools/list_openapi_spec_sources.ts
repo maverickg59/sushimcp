@@ -7,7 +7,7 @@ import {
 import { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 
 // --- List OpenAPI Specs Tool ---
-export const list_api_spec_sources = async (
+export const list_openapi_spec_sources = async (
   extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
   apiSpecSources: Record<string, string>
 ): Promise<CallToolResult> => {

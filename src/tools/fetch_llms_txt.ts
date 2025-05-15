@@ -27,9 +27,7 @@ export const fetch_llms_txt = async (
   extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
   allowedDomains: Set<string>
 ): Promise<CallToolResult> => {
-  if (process.env.MCP_STDIO_MODE !== "silent") {
-    console.info(`Processing fetch_docs request with params:`, params);
-  }
+  console.info(`Processing fetch_llms_txt request with params:`, params);
 
   try {
     // Handle both input formats
@@ -43,11 +41,11 @@ export const fetch_llms_txt = async (
       if (targetInfo.type === "unsupported") {
         throw new Error(`For URL ${url}: ${targetInfo.reason}`);
       }
+
       checkDomainAccess(targetInfo, allowedDomains);
 
-      if (process.env.MCP_STDIO_MODE !== "silent") {
-        console.info(`Fetching llms.txt from ${url}`);
-      }
+      console.info(`Fetching llms.txt from ${url}`);
+
       const fileContent = await fetchContent(targetInfo);
 
       results.push({
@@ -60,7 +58,7 @@ export const fetch_llms_txt = async (
       content: results,
     };
   } catch (error: any) {
-    console.error(`Error in fetch_docs: ${error.message}`);
+    console.error(`Error in fetch_llms_txt: ${error.message}`);
     throw new Error(`Failed to process fetch request: ${error.message}`);
   }
 };

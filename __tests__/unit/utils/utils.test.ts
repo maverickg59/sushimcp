@@ -12,6 +12,14 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import * as url from "url";
 import * as nodeFs from "fs";
+import {
+  consoleErrorSpy,
+  consoleWarnSpy,
+  consoleInfoSpy,
+  mockPathResolution,
+  mockFileSystem,
+  resetAllMocks,
+} from "../../test-utils";
 
 Object.defineProperty(import.meta, "url", {
   value: "file:///fake/path/src/lib/utils.ts",
@@ -19,6 +27,12 @@ Object.defineProperty(import.meta, "url", {
 
 vi.mock("node:fs/promises");
 vi.mock("node:fs");
+vi.mock("fs");
+
+// Setup mocks
+mockPathResolution(path);
+mockFileSystem(fs);
+mockFileSystem(nodeFs);
 
 vi.mock("url", async () => {
   const actual = await vi.importActual<typeof import("url")>("url");
@@ -39,15 +53,6 @@ vi.mock("url", async () => {
     }),
   };
 });
-
-vi.mock("fs", () => ({
-  readFileSync: vi.fn().mockImplementation((path, encoding) => {
-    if (path.includes("package.json")) {
-      return JSON.stringify({ version: "1.2.3" });
-    }
-    throw new Error(`File not found: ${path}`);
-  }),
-}));
 
 vi.mock("path", async () => {
   const actual = await vi.importActual("path");
@@ -84,7 +89,7 @@ describe("extractDomain", () => {
 });
 
 describe("checkDomainAccess", () => {
-  const mockConsoleError = vi.spyOn(console, "error");
+  const consoleInfoSpy = vi.spyOn(console, "info").mockImplementation(() => {});
   const originalEnv = process.env;
 
   beforeEach(() => {
@@ -155,8 +160,7 @@ describe("checkDomainAccess", () => {
     );
   });
 
-  it("should log when MCP_STDIO_MODE is set", () => {
-    process.env.MCP_STDIO_MODE = "true";
+  it("should log allowed domains", () => {
     const targetInfo = {
       type: "remote" as const,
       url: new URL("https://example.com"),
@@ -165,7 +169,7 @@ describe("checkDomainAccess", () => {
     const allowedDomains = new Set(["example.com"]);
 
     checkDomainAccess(targetInfo, allowedDomains);
-    expect(mockConsoleError).toHaveBeenCalledWith(
+    expect(consoleInfoSpy).toHaveBeenCalledWith(
       "Domain 'example.com' is allowed."
     );
   });
@@ -268,15 +272,13 @@ describe("fetchContent", () => {
     expect(fetch).toHaveBeenCalledWith("https://example.com/");
   });
 
-  it("should log to stderr when MCP_STDIO_MODE is set for remote content", async () => {
+  it("should log when fetching remote content", async () => {
     const mockResponse = {
       ok: true,
       text: vi.fn().mockResolvedValue("content"),
     };
     global.fetch = vi.fn().mockResolvedValue(mockResponse as any);
-    const consoleSpy = vi.spyOn(console, "error");
-
-    process.env.MCP_STDIO_MODE = "true";
+    const consoleInfoSpy = vi.spyOn(console, "info");
 
     const targetInfo = {
       type: "remote" as const,
@@ -285,7 +287,7 @@ describe("fetchContent", () => {
     };
 
     await fetchContent(targetInfo);
-    expect(consoleSpy).toHaveBeenCalledWith(
+    expect(consoleInfoSpy).toHaveBeenCalledWith(
       "Fetching remote URL: https://example.com/"
     );
   });
@@ -322,7 +324,7 @@ describe("fetchContent", () => {
 
   it("should fetch local file content from file URL", async () => {
     vi.mocked(fs.readFile).mockResolvedValueOnce("file url content" as any);
-    const consoleSpy = vi.spyOn(console, "error");
+    const consoleInfoSpy = vi.spyOn(console, "info");
 
     const targetInfo = {
       type: "localFileUrl" as const,
@@ -333,7 +335,7 @@ describe("fetchContent", () => {
     const content = await fetchContent(targetInfo);
     expect(content).toBe("file url content");
     expect(fs.readFile).toHaveBeenCalledWith("/local/file/path", "utf-8");
-    expect(consoleSpy).toHaveBeenCalledWith(
+    expect(consoleInfoSpy).toHaveBeenCalledWith(
       "Reading local file path from file: URL: /local/file/path"
     );
   });
@@ -389,3 +391,6 @@ describe("getVersion", () => {
     expect(typeof getVersion).toBe("function");
   });
 });
+
+// Copyright (C) 2025 Christopher White
+// SPDX-License-Identifier: AGPL-3.0-or-later

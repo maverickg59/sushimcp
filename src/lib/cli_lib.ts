@@ -136,10 +136,11 @@ export function normalizeAndAddDomain(
   } catch {
     // If not a URL, treat as a plain domain
     const normalizedDomain = domain.trim().toLowerCase();
+
     if (normalizedDomain) {
       target.add(normalizedDomain);
     } else {
-      console.error(`Skipping empty ${origin} entry.`);
+      console.warn(`Skipping empty ${origin} entry.`);
     }
   }
 }
@@ -148,19 +149,20 @@ export function normalizeAndAddDomain(
  * Log the configuration summary if in appropriate mode
  */
 export function logConfigSummary(config: CliConfig): void {
-  if (process.env.MCP_STDIO_MODE) {
-    console.info("\\n--- SushiMCP Configuration Summary ---");
-    console.info(
-      `Documentation Sources: ${JSON.stringify(config.docSources, null, 2)}`
-    );
-    console.info(
-      `OpenAPI Specs: ${JSON.stringify(config.openApiSpecs, null, 2)}`
-    );
-    console.info(
-      `Allowed Fetch Domains: ${
-        [...config.allowedDomains].join(", ") || "(None - local only?)"
-      }`
-    );
-    console.info("------------------------------------\\n");
-  }
+  console.info("\\n--- SushiMCP Configuration Summary ---");
+  console.info(
+    `Documentation Sources: ${JSON.stringify(config.docSources, null, 2)}`
+  );
+  console.info(
+    `OpenAPI Specs: ${JSON.stringify(config.openApiSpecs, null, 2)}`
+  );
+  console.info(
+    `Allowed Fetch Domains: ${
+      [...config.allowedDomains].join(", ") || "(None - local only?)"
+    }`
+  );
+  console.info("------------------------------------\\n");
 }
+
+// Copyright (C) 2025 Christopher White
+// SPDX-License-Identifier: AGPL-3.0-or-later

@@ -94,3 +94,6 @@ describe("Husky Configuration", () => {
     expect(preCommitContent).toMatchSnapshot();
   });
 });
+
+// Copyright (C) 2025 Christopher White
+// SPDX-License-Identifier: AGPL-3.0-or-later

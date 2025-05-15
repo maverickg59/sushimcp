@@ -1,6 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { 
+  consoleErrorSpy, 
+  consoleWarnSpy, 
+  mockPathResolution,
+  resetAllMocks 
+} from "../../test-utils";
 
 vi.mock("node:fs");
 vi.mock("node:path");
@@ -11,13 +17,9 @@ vi.mock("#lib/cli_lib.js");
 import { loadDefaultSources, inferDomainsFromSources } from "#lib/cli";
 
 describe("CLI Error Handling", () => {
-  const consoleErrorSpy = vi
-    .spyOn(console, "error")
-    .mockImplementation(() => {});
-
   beforeEach(() => {
-    vi.resetAllMocks();
-    vi.mocked(path.resolve).mockImplementation((...parts) => parts.join("/"));
+    resetAllMocks();
+    mockPathResolution(path);
   });
 
   describe("loadDefaultSources", () => {
@@ -47,7 +49,7 @@ describe("CLI Error Handling", () => {
 
       inferDomainsFromSources(sources, allowedDomains);
 
-      expect(consoleErrorSpy).toHaveBeenCalled();
+      expect(consoleWarnSpy).toHaveBeenCalled();
     });
 
     it("should respect wildcard domains and limit domain inference", () => {
@@ -74,9 +76,12 @@ describe("CLI Error Handling", () => {
 
       inferDomainsFromSources(sources, allowedDomains);
 
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
+      expect(consoleWarnSpy).toHaveBeenCalledWith(
         "Warning: No domains specified or inferred. Fetching might be restricted."
       );
     });
   });
 });
+
+// Copyright (C) 2025 Christopher White
+// SPDX-License-Identifier: AGPL-3.0-or-later

@@ -1,11 +1,16 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { fetch_open_api_spec } from "#tools/fetch_open_api_spec";
+import { fetch_openapi_spec } from "#tools/fetch_openapi_spec";
 import * as utils from "#lib/utils";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import type {
   ServerRequest,
   ServerNotification,
 } from "@modelcontextprotocol/sdk/types.js";
+import {
+  consoleErrorSpy,
+  consoleInfoSpy,
+  resetAllMocks,
+} from "../../test-utils";
 
 vi.mock("#lib/utils", async () => {
   const actual = await vi.importActual("#lib/utils");
@@ -17,14 +22,7 @@ vi.mock("#lib/utils", async () => {
   };
 });
 
-describe("fetch_open_api_spec", () => {
-  const mockConsoleInfo = vi
-    .spyOn(console, "info")
-    .mockImplementation(() => {});
-  const mockConsoleError = vi
-    .spyOn(console, "error")
-    .mockImplementation(() => {});
-
+describe("fetch_openapi_spec", () => {
   const mockExtra = {} as RequestHandlerExtra<
     ServerRequest,
     ServerNotification
@@ -34,9 +32,8 @@ describe("fetch_open_api_spec", () => {
   const originalEnv = process.env;
 
   beforeEach(() => {
-    vi.resetAllMocks();
+    resetAllMocks();
     process.env = { ...originalEnv };
-    process.env.MCP_STDIO_MODE = "silent";
   });
 
   afterEach(() => {
@@ -55,7 +52,7 @@ describe("fetch_open_api_spec", () => {
       '{"openapi":"3.0.0","info":{"title":"Test API"}}'
     );
 
-    const result = await fetch_open_api_spec(
+    const result = await fetch_openapi_spec(
       { url: "https://example.com/openapi.json" },
       mockExtra,
       mockAllowedDomains
@@ -103,7 +100,7 @@ describe("fetch_open_api_spec", () => {
         '{"openapi":"3.0.0","info":{"title":"Second API"}}'
       );
 
-    const result = await fetch_open_api_spec(
+    const result = await fetch_openapi_spec(
       [
         "https://example.com/openapi.json",
         "https://api.example.org/openapi.json",
@@ -130,9 +127,7 @@ describe("fetch_open_api_spec", () => {
     });
   });
 
-  it("should log to console when MCP_STDIO_MODE is not silent", async () => {
-    process.env.MCP_STDIO_MODE = "verbose";
-
+  it("should log when fetching OpenAPI spec", async () => {
     const mockTargetInfo = {
       type: "remote" as const,
       url: new URL("https://example.com/openapi.json"),
@@ -142,19 +137,19 @@ describe("fetch_open_api_spec", () => {
     vi.mocked(utils.parseFetchTarget).mockResolvedValueOnce(mockTargetInfo);
     vi.mocked(utils.fetchContent).mockResolvedValueOnce('{"openapi":"3.0.0"}');
 
-    await fetch_open_api_spec(
+    await fetch_openapi_spec(
       { url: "https://example.com/openapi.json" },
       mockExtra,
       mockAllowedDomains
     );
 
-    expect(mockConsoleInfo).toHaveBeenCalledWith(
+    expect(consoleInfoSpy).toHaveBeenCalledWith(
       expect.stringContaining(
-        "Processing fetch_open_api_spec request with params:"
+        "Processing fetch_openapi_spec request with params:"
       ),
       expect.anything()
     );
-    expect(mockConsoleInfo).toHaveBeenCalledWith(
+    expect(consoleInfoSpy).toHaveBeenCalledWith(
       expect.stringContaining(
         "Fetching OpenAPI spec from https://example.com/openapi.json"
       )
@@ -171,13 +166,17 @@ describe("fetch_open_api_spec", () => {
     vi.mocked(utils.parseFetchTarget).mockResolvedValueOnce(unsupportedTarget);
 
     await expect(
-      fetch_open_api_spec(
+      fetch_openapi_spec(
         { url: "ftp://example.com/openapi.json" },
         mockExtra,
         mockAllowedDomains
       )
     ).rejects.toThrow(
       "For URL ftp://example.com/openapi.json: Invalid protocol"
+    );
+
+    expect(consoleErrorSpy).toHaveBeenCalledWith(
+      `Error in fetch_openapi_spec: For URL ftp://example.com/openapi.json: Invalid protocol`
     );
   });
 
@@ -196,14 +195,14 @@ describe("fetch_open_api_spec", () => {
     });
 
     await expect(
-      fetch_open_api_spec(
+      fetch_openapi_spec(
         { url: "https://untrusted.example/openapi.json" },
         mockExtra,
         mockAllowedDomains
       )
     ).rejects.toThrow("Failed to process fetch request: Access denied");
 
-    expect(mockConsoleError).toHaveBeenCalled();
+    expect(consoleErrorSpy).toHaveBeenCalled();
   });
 
   it("should handle content fetch failures", async () => {
@@ -219,13 +218,16 @@ describe("fetch_open_api_spec", () => {
     );
 
     await expect(
-      fetch_open_api_spec(
+      fetch_openapi_spec(
         { url: "https://example.com/not-found.json" },
         mockExtra,
         mockAllowedDomains
       )
     ).rejects.toThrow("Failed to process fetch request: HTTP error 404");
 
-    expect(mockConsoleError).toHaveBeenCalled();
+    expect(consoleErrorSpy).toHaveBeenCalled();
   });
 });
+
+// Copyright (C) 2025 Christopher White
+// SPDX-License-Identifier: AGPL-3.0-or-later

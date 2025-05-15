@@ -1,12 +1,12 @@
 import { describe, it, expect } from "vitest";
-import { list_api_spec_sources } from "#tools/list_api_spec_sources";
+import { list_openapi_spec_sources } from "#tools/list_openapi_spec_sources";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import type {
   ServerRequest,
   ServerNotification,
 } from "@modelcontextprotocol/sdk/types.js";
 
-describe("list_api_spec_sources", () => {
+describe("list_openapi_spec_sources", () => {
   it("should format and return a list of API specifications", async () => {
     const mockExtra = {} as RequestHandlerExtra<
       ServerRequest,
@@ -18,7 +18,7 @@ describe("list_api_spec_sources", () => {
       dev_api: "https://dev.example.com/api/swagger.yaml",
     };
 
-    const result = await list_api_spec_sources(mockExtra, mockApiSpecs);
+    const result = await list_openapi_spec_sources(mockExtra, mockApiSpecs);
 
     expect(result).toHaveProperty("content");
     expect(Array.isArray(result.content)).toBe(true);
@@ -39,7 +39,7 @@ describe("list_api_spec_sources", () => {
       ServerRequest,
       ServerNotification
     >;
-    const result = await list_api_spec_sources(mockExtra, {});
+    const result = await list_openapi_spec_sources(mockExtra, {});
     expect(result).toHaveProperty("content");
     expect(Array.isArray(result.content)).toBe(true);
     expect(result.content[0]).toHaveProperty("type", "text");
@@ -59,7 +59,7 @@ describe("list_api_spec_sources", () => {
       external_api: "https://external.example.com/swagger.json",
     };
 
-    const result = await list_api_spec_sources(mockExtra, mockApiSpecs);
+    const result = await list_openapi_spec_sources(mockExtra, mockApiSpecs);
     const content = result.content[0].text;
     expect(content).toContain("Available OpenAPI specifications:");
     expect(content).toContain("api-v1: http://localhost:3000/v1/openapi.json");
@@ -69,3 +69,6 @@ describe("list_api_spec_sources", () => {
     );
   });
 });
+
+// Copyright (C) 2025 Christopher White
+// SPDX-License-Identifier: AGPL-3.0-or-later

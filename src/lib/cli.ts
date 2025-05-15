@@ -115,14 +115,10 @@ export function processDomainOptions(
     });
   }
 
-  // If no domains were specified, infer from docSources
-  if (!userSpecifiedDomains) {
-    inferDomainsFromSources(docSources, allowedDomains);
-  }
-
-  // If no domains were specified, infer from openApiSpecs
+  // If no domains were specified, infer from sources
   if (!userSpecifiedDomains) {
     inferDomainsFromSources(openApiSpecs, allowedDomains);
+    inferDomainsFromSources(docSources, allowedDomains);
   }
 
   // Process individual --deny-domain options
@@ -164,7 +160,7 @@ export function inferDomainsFromSources(
       }
     } catch (e) {
       console.error(
-        `Warning: Could not parse source URL '${url}' for domain inference. Error: ${
+        `Could not parse source URL '${url}' for domain inference. Error: ${
           e instanceof Error ? e.message : String(e)
         }. Skipping.`
       );
@@ -173,11 +169,11 @@ export function inferDomainsFromSources(
 
   // Warning messages
   if (allowedDomains.size === 0 && Object.keys(sources).length > 0) {
-    console.error(
+    console.warn(
       "Warning: No remote URLs configured or parsed, and no explicit domains allowed. Fetching might be restricted to local files only."
     );
   } else if (allowedDomains.size === 0) {
-    console.error(
+    console.warn(
       "Warning: No domains specified or inferred. Fetching might be restricted."
     );
   }
@@ -207,10 +203,7 @@ export function getDocSources(
     "--llms-txt-sources"
   );
 
-  if (
-    process.env.MCP_STDIO_MODE === "verbose" &&
-    (options.url || options.urls)
-  ) {
+  if (options.url || options.urls) {
     console.warn(
       "Warning: The --url and --urls options are deprecated. Use --llms-txt-source and --llms-txt-sources instead."
     );
@@ -228,7 +221,7 @@ export function getDocSources(
   Object.assign(docSources, deprecatedDocSources);
 
   if (Object.keys(docSources).length === 0) {
-    console.error(
+    console.warn(
       "Warning: No documentation sources were configured (check defaults, --url, --urls)."
     );
   }
@@ -249,7 +242,7 @@ export function getOpenApiSpecs(options: OptionValues): Record<string, string> {
   );
 
   if (Object.keys(openApiSpecs).length === 0) {
-    console.error(
+    console.warn(
       "Warning: No OpenAPI specs were configured (check defaults, --openapi-spec-source, --openapi-spec-sources)."
     );
   }
