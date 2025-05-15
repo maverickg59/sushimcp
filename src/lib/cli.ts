@@ -165,6 +165,7 @@ export function getDocSources(
   includeDefaults: boolean
 ): Record<string, string> {
   let docSources: Record<string, string> = {};
+  let deprecatedDocSources: Record<string, string> = {};
 
   // Load defaults if needed
   if (includeDefaults) {
@@ -175,11 +176,31 @@ export function getDocSources(
   // Process URL options
   docSources = processSourceOptions(
     docSources,
+    options.llmsTxtSource,
+    "--llms-txt-source",
+    options.llmsTxtSources,
+    "--llms-txt-sources"
+  );
+
+  if (
+    process.env.MCP_STDIO_MODE === "verbose" &&
+    (options.url || options.urls)
+  ) {
+    console.warn(
+      "Warning: The --url and --urls options are deprecated. Use --llms-txt-source and --llms-txt-sources instead."
+    );
+  }
+
+  deprecatedDocSources = processSourceOptions(
+    deprecatedDocSources,
     options.url,
     "--url",
     options.urls,
     "--urls"
   );
+
+  // Merge deprecated sources into docSources
+  Object.assign(docSources, deprecatedDocSources);
 
   if (Object.keys(docSources).length === 0) {
     console.error(
@@ -196,15 +217,15 @@ export function getOpenApiSpecs(options: OptionValues): Record<string, string> {
 
   openApiSpecs = processSourceOptions(
     openApiSpecs,
-    options.openapiSpec,
-    "--openapi-spec",
-    options.openapiSpecs,
-    "--openapi-specs"
+    options.openapiSpecSource,
+    "--openapi-spec-source",
+    options.openapiSpecSources,
+    "--openapi-spec-sources"
   );
 
   if (Object.keys(openApiSpecs).length === 0) {
     console.error(
-      "Warning: No OpenAPI specs were configured (check defaults, --openapi-spec, --openapi-specs)."
+      "Warning: No OpenAPI specs were configured (check defaults, --openapi-spec-source, --openapi-spec-sources)."
     );
   }
 
@@ -221,23 +242,35 @@ export function parseCliArgs(): CliConfig {
     )
     .version(VERSION)
     .option(
+      // DEPRECATED: Use --llms-txt-source instead
       "--url <name:url>",
       "Specify a single documentation source (repeatable)",
       (value, previous: string[] = []) => previous.concat(value),
       []
     )
     .option(
+      // DEPRECATED: Use --llms-txt-sources instead
       "--urls <string>",
-      "Specify a list of documentation sources as a single space-separated string (e.g., 'name1:url1 name2:url2')"
+      "Specify a list of llms.txt sources as a single space-separated string (e.g., 'name1:url1 name2:url2')"
     )
     .option(
-      "--openapi-spec <name:url>",
+      "--llms-txt-source <name:url>",
+      "Specify a single documentation source (repeatable)",
+      (value, previous: string[] = []) => previous.concat(value),
+      []
+    )
+    .option(
+      "--llms-txt-sources <string>",
+      "Specify a list of llms.txt sources as a single space-separated string (e.g., 'name1:url1 name2:url2')"
+    )
+    .option(
+      "--openapi-spec-source <name:url>",
       "Specify a single OpenAPI spec source (repeatable)",
       (value, previous: string[] = []) => previous.concat(value),
       []
     )
     .option(
-      "--openapi-specs <string>",
+      "--openapi-spec-sources <string>",
       "Specify a list of OpenAPI spec sources as a single space-separated string (e.g., 'name1:url1 name2:url2')"
     )
     .option(
@@ -257,10 +290,11 @@ export function parseCliArgs(): CliConfig {
 
   program.parse(process.argv);
   const options = program.opts();
-  const includeDefaults = options.noDefaults !== true;
+
+  console.error("defaults: ", options.defaults);
 
   // Process all options
-  const docSources = getDocSources(options, includeDefaults);
+  const docSources = getDocSources(options, options.defaults);
   const openApiSpecs = getOpenApiSpecs(options);
   const allowedDomains = processDomainOptions(
     options.allowDomain,

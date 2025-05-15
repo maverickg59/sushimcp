@@ -8,9 +8,9 @@
     "sushimcp": "dist/index.js"
   },
   "scripts": {
-    "dev": "tsup src/index.ts --format esm --watch --onSuccess \"node dist/index.js --url hono:https://hono.dev/llms-full.txt\"",
+    "dev": "tsup src/index.ts --format esm --watch --onSuccess \"node dist/index.js --llms-txt-source hono:https://hono.dev/llms-full.txt\"",
     "build": "tsup src/index.ts --format esm --dts --minify && cp -r static/ dist/static",
-    "start": "node dist/index.js --url hono:https://hono.dev/llms-full.txt",
+    "start": "node dist/index.js --llms-txt-source hono:https://hono.dev/llms-full.txt",
     "publish": "npm run build && npm publish --access public",
     "clear:npx:cache": "npx clear-npx-cache",
     "inspector": "npm run build && npx -y @modelcontextprotocol/inspector",

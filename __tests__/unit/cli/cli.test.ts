@@ -102,7 +102,7 @@ describe("CLI Module", () => {
     it("should parse CLI arguments correctly with defaults", () => {
       // Setup Commander opts mock to return empty options
       mockOptsFn.mockReturnValue({
-        noDefaults: false,
+        defaults: true,
         url: [],
         urls: undefined,
         openApiSpec: [],
@@ -139,7 +139,7 @@ describe("CLI Module", () => {
     it("should parse CLI arguments with no defaults", () => {
       // Setup Commander opts mock to return no-defaults option
       mockOptsFn.mockReturnValue({
-        noDefaults: true,
+        defaults: false,
         url: ["react:https://example.com/react"],
         urls: undefined,
         openApiSpec: [],

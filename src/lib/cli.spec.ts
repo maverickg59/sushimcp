@@ -2,14 +2,12 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
-import { Command, OptionValues } from "commander";
 import * as cliLib from "./cli_lib.js";
 
 // Mock dependencies
 vi.mock("node:fs");
 vi.mock("node:path");
 vi.mock("node:url");
-vi.mock("commander");
 vi.mock("./cli_lib.js");
 vi.mock("./utils.js");
 
@@ -18,7 +16,9 @@ import * as cliModule from "./cli.js";
 
 describe("CLI Internal Functions", () => {
   // Setup spies for console methods
-  const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+  const consoleErrorSpy = vi
+    .spyOn(console, "error")
+    .mockImplementation(() => {});
   const consoleInfoSpy = vi.spyOn(console, "info").mockImplementation(() => {});
 
   // Store original environment
@@ -54,14 +54,15 @@ describe("CLI Internal Functions", () => {
 
   describe("loadDefaultSources", () => {
     it("should load and parse default sources from file", () => {
-      const mockFileContent = "- typescript:https://example.com/typescript\n- node:http://nodejs.org/docs";
+      const mockFileContent =
+        "- typescript:https://example.com/typescript\n- node:http://nodejs.org/docs";
       vi.mocked(fs.readFileSync).mockReturnValue(mockFileContent);
 
       const result = cliModule.loadDefaultSources("/mock/defaults.txt");
 
       expect(result).toEqual({
         typescript: "https://example.com/typescript",
-        node: "http://nodejs.org/docs"
+        node: "http://nodejs.org/docs",
       });
     });
 
@@ -82,20 +83,20 @@ describe("CLI Internal Functions", () => {
       const sources = {};
       const singleOptions = [
         "node:https://example.com/node",
-        "typescript:https://example.com/ts"
+        "typescript:https://example.com/ts",
       ];
 
       const result = cliModule.processSourceOptions(
         sources,
         singleOptions,
-        "--url",
+        "--llms-txt-source",
         undefined,
-        "--urls-file"
+        "--llms-txt-sources"
       );
 
       expect(result).toEqual({
         node: "https://example.com/node",
-        typescript: "https://example.com/ts"
+        typescript: "https://example.com/ts",
       });
     });
 
@@ -106,9 +107,9 @@ describe("CLI Internal Functions", () => {
       const result = cliModule.processSourceOptions(
         sources,
         singleOptions,
-        "--url",
+        "--llms-txt-source",
         undefined,
-        "--urls-file"
+        "--llms-txt-sources-file"
       );
 
       expect(result).toEqual({});
@@ -120,13 +121,15 @@ describe("CLI Internal Functions", () => {
     it("should process individual domain options", () => {
       const allowDomainOptions = ["example.com", "test.org"];
       const docSources = {
-        test: "https://example.com/docs"
+        test: "https://example.com/docs",
       };
+      const openApiSpecs = { test: "https://example.com/api/v1/openapi.json" };
 
       const result = cliModule.processDomainOptions(
         allowDomainOptions,
         undefined,
-        docSources
+        docSources,
+        openApiSpecs
       );
 
       expect(result).toEqual(new Set(["example.com", "test.org"]));
@@ -135,13 +138,15 @@ describe("CLI Internal Functions", () => {
     it("should handle wildcard domain option", () => {
       const allowDomainOptions = ["*"];
       const docSources = {
-        test: "https://example.com/docs"
+        test: "https://example.com/docs",
       };
+      const openApiSpecs = { test: "https://example.com/api/v1/openapi.json" };
 
       const result = cliModule.processDomainOptions(
         allowDomainOptions,
         undefined,
-        docSources
+        docSources,
+        openApiSpecs
       );
 
       expect(result).toEqual(new Set(["*"]));
@@ -152,7 +157,7 @@ describe("CLI Internal Functions", () => {
     it("should extract domains from HTTP/HTTPS URLs", () => {
       const sources = {
         typescript: "https://example.com/typescript/llms.txt",
-        nodejs: "http://nodejs.org/docs/llms.txt"
+        nodejs: "http://nodejs.org/docs/llms.txt",
       };
       const allowedDomains = new Set<string>();
 
@@ -163,7 +168,7 @@ describe("CLI Internal Functions", () => {
 
     it("should not add domains when wildcard is present", () => {
       const sources = {
-        typescript: "https://example.com/typescript/llms.txt"
+        typescript: "https://example.com/typescript/llms.txt",
       };
       const allowedDomains = new Set<string>(["*"]);
 

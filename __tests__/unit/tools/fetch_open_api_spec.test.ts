@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
-import { fetch_openapi_spec } from "#tools/fetch_openapi_spec";
+import { fetch_open_api_spec } from "#tools/fetch_open_api_spec";
 import * as utils from "#lib/utils";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import type {
@@ -17,7 +17,7 @@ vi.mock("#lib/utils", async () => {
   };
 });
 
-describe("fetch_openapi_spec", () => {
+describe("fetch_open_api_spec", () => {
   const mockConsoleInfo = vi
     .spyOn(console, "info")
     .mockImplementation(() => {});
@@ -55,7 +55,7 @@ describe("fetch_openapi_spec", () => {
       '{"openapi":"3.0.0","info":{"title":"Test API"}}'
     );
 
-    const result = await fetch_openapi_spec(
+    const result = await fetch_open_api_spec(
       { url: "https://example.com/openapi.json" },
       mockExtra,
       mockAllowedDomains
@@ -103,7 +103,7 @@ describe("fetch_openapi_spec", () => {
         '{"openapi":"3.0.0","info":{"title":"Second API"}}'
       );
 
-    const result = await fetch_openapi_spec(
+    const result = await fetch_open_api_spec(
       [
         "https://example.com/openapi.json",
         "https://api.example.org/openapi.json",
@@ -142,7 +142,7 @@ describe("fetch_openapi_spec", () => {
     vi.mocked(utils.parseFetchTarget).mockResolvedValueOnce(mockTargetInfo);
     vi.mocked(utils.fetchContent).mockResolvedValueOnce('{"openapi":"3.0.0"}');
 
-    await fetch_openapi_spec(
+    await fetch_open_api_spec(
       { url: "https://example.com/openapi.json" },
       mockExtra,
       mockAllowedDomains
@@ -150,7 +150,7 @@ describe("fetch_openapi_spec", () => {
 
     expect(mockConsoleInfo).toHaveBeenCalledWith(
       expect.stringContaining(
-        "Processing fetch_openapi_spec request with params:"
+        "Processing fetch_open_api_spec request with params:"
       ),
       expect.anything()
     );
@@ -171,7 +171,7 @@ describe("fetch_openapi_spec", () => {
     vi.mocked(utils.parseFetchTarget).mockResolvedValueOnce(unsupportedTarget);
 
     await expect(
-      fetch_openapi_spec(
+      fetch_open_api_spec(
         { url: "ftp://example.com/openapi.json" },
         mockExtra,
         mockAllowedDomains
@@ -196,7 +196,7 @@ describe("fetch_openapi_spec", () => {
     });
 
     await expect(
-      fetch_openapi_spec(
+      fetch_open_api_spec(
         { url: "https://untrusted.example/openapi.json" },
         mockExtra,
         mockAllowedDomains
@@ -219,7 +219,7 @@ describe("fetch_openapi_spec", () => {
     );
 
     await expect(
-      fetch_openapi_spec(
+      fetch_open_api_spec(
         { url: "https://example.com/not-found.json" },
         mockExtra,
         mockAllowedDomains

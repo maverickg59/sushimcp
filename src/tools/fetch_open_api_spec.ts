@@ -22,13 +22,13 @@ export const FetchOpenApiSpecInputSchema = z.union([
   z.array(z.string().url("Each array item must be a valid URL string")),
 ]);
 
-export const fetch_openapi_spec = async (
+export const fetch_open_api_spec = async (
   params: z.infer<typeof FetchOpenApiSpecInputSchema>,
   extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
   allowedDomains: Set<string>
 ): Promise<CallToolResult> => {
   if (process.env.MCP_STDIO_MODE !== "silent") {
-    console.info(`Processing fetch_openapi_spec request with params:`, params);
+    console.info(`Processing fetch_open_api_spec request with params:`, params);
   }
 
   try {

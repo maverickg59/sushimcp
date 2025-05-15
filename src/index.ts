@@ -11,14 +11,14 @@ import {
   list_llms_txt_sources,
   fetch_llms_txt,
   FetchLlmsTxtInputSchema,
-  fetch_openapi_spec,
+  fetch_open_api_spec,
   FetchOpenApiSpecInputSchema,
   list_api_spec_sources,
 } from "#tools/index.js";
 import { parseCliArgs, getVersion } from "#lib/index.js";
 import { z } from "zod";
 
-// /Users/christopherwhite/Develop/projects/sushimcp/sushimcp/dist/index.js --allow-domain http://localhost:8787 --openapi-spec http://localhost:8787/api/v1/openapi.json
+// /Users/christopherwhite/Develop/projects/sushimcp/sushimcp/dist/index.js --allow-domain http://localhost:8787 --openapi-spec-source http://localhost:8787/api/v1/openapi.json
 
 // --- Parse CLI Arguments --- //
 const { docSources, allowedDomains, openApiSpecs } = parseCliArgs();
@@ -126,13 +126,13 @@ server.tool(
 );
 
 server.tool(
-  "fetch_openapi_spec",
+  "fetch_open_api_spec",
   "Fetches the content of one or more OpenAPI spec urls.",
   { input: FetchOpenApiSpecInputSchema },
   (
     { input }: { input: z.infer<typeof FetchOpenApiSpecInputSchema> },
     extra: RequestHandlerExtra<ServerRequest, ServerNotification>
-  ) => fetch_openapi_spec(input, extra, allowedDomains)
+  ) => fetch_open_api_spec(input, extra, allowedDomains)
 );
 
 // --- Start Server --- //
