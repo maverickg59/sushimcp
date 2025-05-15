@@ -31,6 +31,18 @@ Visit the [SushiMCP Docs](https://docs.sushimcp.com) for more information on adv
 
 <br>
 
+## Glama.ai Ratings
+
+<div align="center">
+
+<a href="https://glama.ai/mcp/servers/@maverickg59/sushimcp">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@maverickg59/sushimcp/badge" />
+</a>
+
+</div>
+
+<br>
+
 ## Author
 
 Chris White: [Email](mailto:chris@chriswhite.rocks) | [GitHub](https://github.com/maverickg59) | [Discord](https://discord.com/users/1115027188840939560) | [Personal Site](https://chriswhite.rocks) | [X](https://x.com/chriswhiterox) | [LinkedIn](https://www.linkedin.com/in/chrisewhite) | [Five9 Cyber](https://www.fiv9cyber.com/)
@@ -40,11 +52,3 @@ Chris White: [Email](mailto:chris@chriswhite.rocks) | [GitHub](https://github.co
 ## License
 
 This project is licensed under the AGPL-3.0-or-later. See the `license.txt` file for details.
-
-<br>
-
-## Glama.ai Ratings
-
-<a href="https://glama.ai/mcp/servers/@maverickg59/sushimcp">
-  <img width="380" height="200" src="https://glama.ai/mcp/servers/@maverickg59/sushimcp/badge" />
-</a>
