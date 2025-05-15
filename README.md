@@ -5,6 +5,7 @@
 </div>
 
 [![Verified on MseeP](https://mseep.ai/badge.svg)](https://mseep.ai/app/7b84b486-4ccb-4fc5-8d3b-74d398fa59c0)
+[![smithery badge](https://smithery.ai/badge/@maverickg59/sushimcp)](https://smithery.ai/server/@maverickg59/sushimcp)
 
 # SushiMCP
 
