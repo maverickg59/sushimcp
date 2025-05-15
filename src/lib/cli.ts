@@ -89,10 +89,13 @@ export function processSourceOptions(
 export function processDomainOptions(
   allowDomainOptions: string[] | undefined,
   allowDomainsOption: string | undefined,
+  denyDomainOptions: string[] | undefined,
+  denyDomainsOption: string | undefined,
   docSources: Record<string, string>,
   openApiSpecs: Record<string, string>
 ): Set<string> {
   const allowedDomains = new Set<string>();
+  const deniedDomains = new Set<string>();
   let userSpecifiedDomains = false;
 
   // Process individual --allow-domain options
@@ -121,6 +124,28 @@ export function processDomainOptions(
   if (!userSpecifiedDomains) {
     inferDomainsFromSources(openApiSpecs, allowedDomains);
   }
+
+  // Process individual --deny-domain options
+  if (denyDomainOptions && denyDomainOptions.length > 0) {
+    userSpecifiedDomains = true;
+    denyDomainOptions.forEach((domain) => {
+      normalizeAndAddDomain(domain, deniedDomains, "--deny-domain");
+    });
+  }
+
+  // Process space-separated --deny-domains option
+  if (denyDomainsOption) {
+    userSpecifiedDomains = true;
+    const domainsList = denyDomainsOption.split(/\s+/);
+    domainsList.forEach((domain) => {
+      normalizeAndAddDomain(domain, deniedDomains, "--deny-domains");
+    });
+  }
+
+  // Remove denied domains from allowed domains
+  deniedDomains.forEach((domain) => {
+    allowedDomains.delete(domain);
+  });
 
   return allowedDomains;
 }
@@ -284,14 +309,22 @@ export function parseCliArgs(): CliConfig {
       []
     )
     .option(
-      "--allow-domains <domain>",
+      "--allow-domains <string>",
       "Allow fetching from a list of domains as a single space-separated string (e.g., 'domain1 domain2')"
+    )
+    .option(
+      "--deny-domain <domain>",
+      "Deny fetching from a specific domain (repeatable, use '*' for all)",
+      (value, previous: string[] = []) => previous.concat(value),
+      []
+    )
+    .option(
+      "--deny-domains <string>",
+      "Deny fetching from a list of domains as a single space-separated string (e.g., 'domain1 domain2')"
     );
 
   program.parse(process.argv);
   const options = program.opts();
-
-  console.error("defaults: ", options.defaults);
 
   // Process all options
   const docSources = getDocSources(options, options.defaults);
@@ -299,6 +332,8 @@ export function parseCliArgs(): CliConfig {
   const allowedDomains = processDomainOptions(
     options.allowDomain,
     options.allowDomains,
+    options.denyDomain,
+    options.denyDomains,
     docSources,
     openApiSpecs
   );

@@ -240,6 +240,96 @@ describe("CLI Module", () => {
       expect(cliLib.logConfigSummary).toHaveBeenCalled();
     });
 
+    it("should handle deny-domain options correctly", () => {
+      // Setup Commander opts mock with deny-domain options
+      mockOptsFn.mockReturnValue({
+        noDefaults: true,
+        url: ["react:https://react.dev"],
+        urls: undefined,
+        openApiSpec: [],
+        openApiSpecs: undefined,
+        allowDomain: [],
+        allowDomains: undefined,
+        denyDomain: ["example.com", "test.org"],
+        denyDomains: undefined,
+      });
+
+      // Call the parseCliArgs function
+      const config = parseCliArgs();
+
+      // Verify deny domains were processed
+      expect(config.allowedDomains).toBeDefined();
+      expect(Array.from(config.allowedDomains)).not.toContain("example.com");
+      expect(Array.from(config.allowedDomains)).not.toContain("test.org");
+    });
+
+    it("should handle deny-domains option with space-separated values", () => {
+      // Setup Commander opts mock with deny-domains option
+      mockOptsFn.mockReturnValue({
+        noDefaults: true,
+        url: ["vue:https://vuejs.org"],
+        urls: undefined,
+        openApiSpec: [],
+        openApiSpecs: undefined,
+        allowDomain: [],
+        allowDomains: undefined,
+        denyDomain: [],
+        denyDomains: "example.com test.org",
+      });
+
+      // Call the parseCliArgs function
+      const config = parseCliArgs();
+
+      // Verify deny domains were processed
+      expect(config.allowedDomains).toBeDefined();
+      expect(Array.from(config.allowedDomains)).not.toContain("example.com");
+      expect(Array.from(config.allowedDomains)).not.toContain("test.org");
+    });
+
+    it("should handle deny-domain=* to deny all domains", () => {
+      // Setup Commander opts mock with deny-domain=*
+      mockOptsFn.mockReturnValue({
+        noDefaults: true,
+        url: ["react:https://react.dev"],
+        urls: undefined,
+        openApiSpec: [],
+        openApiSpecs: undefined,
+        allowDomain: [],
+        allowDomains: undefined,
+        denyDomain: ["*"],
+        denyDomains: undefined,
+      });
+
+      // Call the parseCliArgs function
+      const config = parseCliArgs();
+
+      // Verify all domains are denied
+      expect(config.allowedDomains).toBeDefined();
+      expect(config.allowedDomains.size).toBe(0);
+    });
+
+    it("should handle both allow and deny domain options together", () => {
+      // Setup Commander opts mock with both allow and deny domain options
+      mockOptsFn.mockReturnValue({
+        noDefaults: true,
+        url: ["react:https://react.dev"],
+        urls: undefined,
+        openApiSpec: [],
+        openApiSpecs: undefined,
+        allowDomain: ["react.dev"],
+        allowDomains: undefined,
+        denyDomain: ["example.com"],
+        denyDomains: undefined,
+      });
+
+      // Call the parseCliArgs function
+      const config = parseCliArgs();
+
+      // Verify domains were processed correctly
+      expect(Array.from(config.allowedDomains)).toContain("react.dev");
+      expect(Array.from(config.allowedDomains)).not.toContain("example.com");
+    });
+
     it("should return a config object with expected properties", () => {
       // Setup Commander opts mock with sources
       mockOptsFn.mockReturnValue({
@@ -305,6 +395,282 @@ describe("CLI Module", () => {
       // Verify the config contains OpenAPI specs property
       expect(config).toHaveProperty("openApiSpecs");
       expect(typeof config.openApiSpecs).toBe("object");
+    });
+  });
+
+  describe("Source Loading", () => {
+    it("should load only default sources when no arguments provided", () => {
+      mockOptsFn.mockReturnValue({
+        defaults: true,
+        url: [],
+        urls: undefined,
+        llmsTxtSource: [],
+        llmsTxtSources: undefined,
+        openApiSpec: [],
+        openApiSpecs: undefined,
+        allowDomain: [],
+        allowDomains: undefined,
+      });
+
+      // Mock defaults file
+      vi.mocked(fs.readFileSync).mockReturnValue(
+        "- typescript:https://example.com/typescript/llms.txt\n" +
+        "- javascript:https://example.com/javascript/llms.txt"
+      );
+
+      const config = parseCliArgs();
+
+      expect(config.docSources).toHaveProperty("typescript");
+      expect(config.docSources).toHaveProperty("javascript");
+      expect(Object.keys(config.docSources)).toHaveLength(2);
+    });
+
+    it("should load no sources with --no-defaults and no sources specified", () => {
+      mockOptsFn.mockReturnValue({
+        defaults: false,
+        url: [],
+        urls: undefined,
+        llmsTxtSource: [],
+        llmsTxtSources: undefined,
+        openApiSpec: [],
+        openApiSpecs: undefined,
+        allowDomain: [],
+        allowDomains: undefined,
+      });
+
+      const config = parseCliArgs();
+      expect(Object.keys(config.docSources)).toHaveLength(0);
+      expect(fs.readFileSync).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("LLMS Text Sources", () => {
+    it("should handle --llms-txt-source with single source", () => {
+      mockOptsFn.mockReturnValue({
+        defaults: false,
+        llmsTxtSource: ["react:https://react.dev/docs/llms.txt"],
+        llmsTxtSources: undefined,
+        openApiSpec: [],
+        openApiSpecs: undefined,
+      });
+
+      const config = parseCliArgs();
+      expect(config.docSources).toHaveProperty("react");
+      // The mock parseNameValuePair returns the first part after splitting by ':' as the URL
+      expect(config.docSources.react).toBe("https");
+    });
+
+    it("should handle multiple --llms-txt-source flags", () => {
+      mockOptsFn.mockReturnValue({
+        defaults: false,
+        llmsTxtSource: [
+          "react:https://react.dev/docs/llms.txt",
+          "vue:https://vuejs.org/docs/llms.txt"
+        ],
+        llmsTxtSources: undefined,
+      });
+
+      const config = parseCliArgs();
+      expect(config.docSources).toHaveProperty("react");
+      expect(config.docSources).toHaveProperty("vue");
+      expect(Object.keys(config.docSources)).toHaveLength(2);
+    });
+
+    it("should handle --llms-txt-sources with multiple sources", () => {
+      mockOptsFn.mockReturnValue({
+        defaults: false,
+        llmsTxtSource: [],
+        llmsTxtSources: "react:https://react.dev/docs/llms.txt vue:https://vuejs.org/docs/llms.txt",
+      });
+
+      const config = parseCliArgs();
+      expect(config.docSources).toHaveProperty("react");
+      expect(config.docSources).toHaveProperty("vue");
+      expect(Object.keys(config.docSources)).toHaveLength(2);
+    });
+  });
+
+  describe("OpenAPI Spec Sources", () => {
+    it("should handle --openapi-spec-source with single source", () => {
+      mockOptsFn.mockReturnValue({
+        defaults: false,
+        openapiSpecSource: ["petstore:https://example.com/petstore.json"],
+        openapiSpecSources: undefined,
+      });
+
+      // Mock the parseNameValuePair to return the expected format
+      vi.mocked(cliLib.parseNameValuePair).mockImplementation((input) => {
+        const [name, ...rest] = input.split(':');
+        return { name, urlValue: rest.join(':') };
+      });
+
+      const config = parseCliArgs();
+      expect(config.openApiSpecs).toHaveProperty("petstore");
+      expect(config.openApiSpecs.petstore).toBe("https://example.com/petstore.json");
+    });
+
+    it("should handle multiple --openapi-spec-source flags", () => {
+      mockOptsFn.mockReturnValue({
+        defaults: false,
+        openapiSpecSource: [
+          "petstore:https://example.com/petstore.json",
+          "users:https://example.com/users.json"
+        ],
+        openapiSpecSources: undefined,
+      });
+
+      // Mock the parseNameValuePair to return the expected format
+      vi.mocked(cliLib.parseNameValuePair).mockImplementation((input) => {
+        const [name, ...rest] = input.split(':');
+        return { name, urlValue: rest.join(':') };
+      });
+
+      const config = parseCliArgs();
+      expect(config.openApiSpecs).toHaveProperty("petstore");
+      expect(config.openApiSpecs).toHaveProperty("users");
+      expect(Object.keys(config.openApiSpecs)).toHaveLength(2);
+    });
+  });
+
+  describe("Mixed Source Types", () => {
+    it("should handle mixed LLMS and OpenAPI sources", () => {
+      mockOptsFn.mockReturnValue({
+        defaults: false,
+        llmsTxtSource: ["react:https://react.dev/docs/llms.txt"],
+        openapiSpecSource: ["petstore:https://example.com/petstore.json"],
+      });
+
+      // Mock the parseNameValuePair to return the expected format
+      vi.mocked(cliLib.parseNameValuePair).mockImplementation((input) => {
+        const [name, ...rest] = input.split(':');
+        return { name, urlValue: rest.join(':') };
+      });
+
+      const config = parseCliArgs();
+      expect(config.docSources).toHaveProperty("react");
+      expect(config.openApiSpecs).toHaveProperty("petstore");
+    });
+  });
+
+  describe("Deprecated Options", () => {
+    it("should handle --url as LLMS source", () => {
+      mockOptsFn.mockReturnValue({
+        defaults: false,
+        url: ["react:https://react.dev/docs/llms.txt"],
+        urls: undefined,
+        llmsTxtSource: [],
+        llmsTxtSources: undefined,
+      });
+
+      const config = parseCliArgs();
+      expect(config.docSources).toHaveProperty("react");
+    });
+
+    it("should handle --urls as LLMS sources", () => {
+      mockOptsFn.mockReturnValue({
+        defaults: false,
+        url: [],
+        urls: "react:https://react.dev/docs/llms.txt",
+        llmsTxtSource: [],
+        llmsTxtSources: undefined,
+      });
+
+      const config = parseCliArgs();
+      expect(config.docSources).toHaveProperty("react");
+    });
+  });
+
+  describe("Domain Filtering", () => {
+    it("should allow specific domains with --allow-domain", () => {
+      mockOptsFn.mockReturnValue({
+        defaults: false,
+        llmsTxtSource: [
+          "react:https://react.dev/docs/llms.txt",
+          "vue:https://vuejs.org/docs/llms.txt"
+        ],
+        allowDomain: ["react.dev"],
+        allowDomains: undefined,
+      });
+
+      const config = parseCliArgs();
+      // Should only allow react.dev domain
+      expect(Array.from(config.allowedDomains)).toContain("react.dev");
+      expect(Array.from(config.allowedDomains)).not.toContain("vuejs.org");
+    });
+
+    it("should deny specific domains with --deny-domain", () => {
+      mockOptsFn.mockReturnValue({
+        defaults: false,
+        llmsTxtSource: [
+          "react:https://react.dev/docs/llms.txt",
+          "vue:https://vuejs.org/docs/llms.txt"
+        ],
+        denyDomain: ["vuejs.org"],
+        denyDomains: undefined,
+        allowDomain: ["react.dev", "vuejs.org"],
+        allowDomains: undefined,
+      });
+
+      // Mock the parseNameValuePair to return the expected format
+      vi.mocked(cliLib.parseNameValuePair).mockImplementation((input) => {
+        const [name, ...rest] = input.split(':');
+        return { name, urlValue: rest.join(':') };
+      });
+
+      const config = parseCliArgs();
+      // Should deny vuejs.org domain
+      expect(Array.from(config.allowedDomains)).toContain("react.dev");
+      expect(Array.from(config.allowedDomains)).not.toContain("vuejs.org");
+    });
+
+    it("should handle allow and deny domain rules together", () => {
+      mockOptsFn.mockReturnValue({
+        defaults: false,
+        llmsTxtSource: [
+          "react:https://react.dev/docs/llms.txt",
+          "vue:https://vuejs.org/docs/llms.txt",
+          "angular:https://angular.io/docs/llms.txt"
+        ],
+        allowDomain: ["react.dev", "vuejs.org"],
+        denyDomain: ["vuejs.org"],
+      });
+
+      const config = parseCliArgs();
+      // Should allow react.dev but not vuejs.org (deny takes precedence)
+      expect(Array.from(config.allowedDomains)).toContain("react.dev");
+      expect(Array.from(config.allowedDomains)).not.toContain("vuejs.org");
+      expect(Array.from(config.allowedDomains)).not.toContain("angular.io");
+    });
+  });
+
+  describe("Error Handling", () => {
+    it("should handle invalid URL format gracefully", () => {
+      // Mock console.error to verify the error is logged
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      
+      mockOptsFn.mockReturnValue({
+        defaults: false,
+        llmsTxtSource: ["invalid-format"],
+      });
+
+      // Reset the mock implementation for this test
+      vi.mocked(cliLib.parseNameValuePair).mockImplementation((input) => {
+        if (!input.includes(':')) {
+          console.error(`Invalid format: '${input}'. Expected 'name:value'.`);
+          return null;
+        }
+        const [name, ...rest] = input.split(':');
+        return { name, urlValue: rest.join(':') };
+      });
+
+      const config = parseCliArgs();
+      expect(Object.keys(config.docSources)).toHaveLength(0);
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Invalid format: 'invalid-format'. Expected 'name:value'."
+      );
+      
+      // Clean up
+      consoleErrorSpy.mockRestore();
     });
   });
 });
