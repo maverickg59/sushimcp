@@ -75,3 +75,22 @@ describe("Assets Directory", () => {
     expect(assetsStructure).toMatchSnapshot();
   });
 });
+
+describe("Husky Configuration", () => {
+  const rootDir = path.resolve(__dirname, "../..");
+  const huskyDir = path.join(rootDir, ".husky");
+
+  it("should have required husky files", () => {
+    expect(fs.existsSync(huskyDir)).toBe(true);
+    expect(fs.existsSync(path.join(huskyDir, "_"))).toBe(true);
+    expect(fs.existsSync(path.join(huskyDir, "pre-commit"))).toBe(true);
+  });
+
+  it("should match husky files content", () => {
+    const preCommitContent = fs.readFileSync(
+      path.join(huskyDir, "pre-commit"),
+      "utf-8"
+    );
+    expect(preCommitContent).toMatchSnapshot();
+  });
+});

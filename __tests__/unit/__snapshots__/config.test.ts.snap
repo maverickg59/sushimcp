@@ -411,6 +411,7 @@ exports[`Configuration Files > should match package.json snapshot 1`] = `
   "devDependencies": {
     "@types/node": "[version]",
     "@vitest/coverage-v8": "[version]",
+    "husky": "[version]",
     "tsup": "[version]",
     "typescript": "[version]",
     "vite-tsconfig-paths": "[version]",
@@ -445,7 +446,8 @@ exports[`Configuration Files > should match package.json snapshot 1`] = `
     "clear:npx:cache": "npx clear-npx-cache",
     "dev": "tsup src/index.ts --format esm --watch --onSuccess "node dist/index.js --url hono:https://hono.dev/llms-full.txt"",
     "inspector": "npm run build && npx -y @modelcontextprotocol/inspector",
-    "publish": "npm publish --access public",
+    "prepare": "husky",
+    "publish": "npm run build && npm publish --access public",
     "snapshot:update": "vitest run -u",
     "start": "node dist/index.js --url hono:https://hono.dev/llms-full.txt",
     "test": "vitest run",
@@ -505,5 +507,10 @@ export default defineConfig({
   },
   plugins: [tsconfigPaths({ projects: ["tsconfig.test.json"] })],
 });
+"
+`;
+
+exports[`Husky Configuration > should match husky files content 1`] = `
+"npm test
 "
 `;
