@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { list_llms_txt_sources } from "#tools/list_llms_txt_sources.js";
+import { list_llms_txt_sources } from "#tools/list_llms_txt_sources";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import type {
   CallToolResult,
@@ -25,7 +25,7 @@ describe("list_llms_txt_sources", () => {
     expect(Array.isArray(result.content)).toBe(true);
     expect(result.content[0]).toHaveProperty("type", "text");
     const content = result.content[0].text;
-    expect(content).toContain("Available documentation sources:");
+    expect(content).toContain("Available llms.txt sources:");
     expect(content).toContain(
       "typescript: https://example.com/typescript/llms.txt"
     );
@@ -43,7 +43,7 @@ describe("list_llms_txt_sources", () => {
     expect(Array.isArray(result.content)).toBe(true);
     expect(result.content[0]).toHaveProperty("type", "text");
     const content = result.content[0].text;
-    expect(content).toBe("Available documentation sources:");
+    expect(content).toBe("No llms.txt sources configured.");
   });
 
   it("should correctly format multiple document sources with special characters", async () => {
@@ -59,7 +59,7 @@ describe("list_llms_txt_sources", () => {
 
     const result = await list_llms_txt_sources(mockExtra, mockDocSources);
     const content = result.content[0].text;
-    expect(content).toContain("Available documentation sources:");
+    expect(content).toContain("Available llms.txt sources:");
     expect(content).toContain("next.js: https://example.com/next.js/llms.txt");
     expect(content).toContain("vue@3: https://example.com/vue/llms-v3.txt");
     expect(content).toContain(

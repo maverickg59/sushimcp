@@ -33,13 +33,9 @@ Visit the [SushiMCP Docs](https://docs.sushimcp.com) for more information on adv
 
 ## Glama.ai Ratings
 
-<div align="center">
-
 <a href="https://glama.ai/mcp/servers/@maverickg59/sushimcp">
   <img width="380" height="200" src="https://glama.ai/mcp/servers/@maverickg59/sushimcp/badge" />
 </a>
-
-</div>
 
 <br>
 

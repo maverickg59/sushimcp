@@ -6,22 +6,24 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 
-// --- List llms.txt Sources Tool ---
-export const list_llms_txt_sources = async (
+// --- List OpenAPI Specs Tool ---
+export const list_api_spec_sources = async (
   extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
-  docSources: Record<string, string>
+  apiSpecSources: Record<string, string>
 ): Promise<CallToolResult> => {
-  if (Object.keys(docSources).length === 0) {
+  if (Object.keys(apiSpecSources).length === 0) {
     return {
-      content: [{ type: "text", text: "No llms.txt sources configured." }],
+      content: [
+        { type: "text", text: "No OpenAPI specifications configured." },
+      ],
     };
   }
-  let formatted_sources = "Available llms.txt sources:\n";
-  for (const name in docSources) {
-    formatted_sources += `- ${name}: ${docSources[name]}\n`;
+  let formatted_specs = "Available OpenAPI specifications:\n";
+  for (const name in apiSpecSources) {
+    formatted_specs += `- ${name}: ${apiSpecSources[name]}\n`;
   }
   const content: TextContent[] = [
-    { type: "text", text: formatted_sources.trim() },
+    { type: "text", text: formatted_specs.trim() },
   ];
   return { content };
 };

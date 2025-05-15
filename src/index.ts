@@ -11,12 +11,17 @@ import {
   list_llms_txt_sources,
   fetch_llms_txt,
   FetchLlmsTxtInputSchema,
+  fetch_openapi_spec,
+  FetchOpenApiSpecInputSchema,
+  list_api_spec_sources,
 } from "#tools/index.js";
 import { parseCliArgs, getVersion } from "#lib/index.js";
 import { z } from "zod";
 
+// /Users/christopherwhite/Develop/projects/sushimcp/sushimcp/dist/index.js --allow-domain http://localhost:8787 --openapi-spec http://localhost:8787/api/v1/openapi.json
+
 // --- Parse CLI Arguments --- //
-const { docSources, allowedDomains } = parseCliArgs();
+const { docSources, allowedDomains, openApiSpecs } = parseCliArgs();
 
 // --- Determine Mode --- //
 const args = process.argv.slice(2);
@@ -55,12 +60,36 @@ const server = new McpServer(
             openWorldHint: false,
           },
         },
+        list_api_spec_sources: {
+          name: "list_api_spec_sources",
+          description:
+            "List the source urls where an OpenAPI spec can be fetched.",
+          annotations: {
+            title: "List OpenAPI spec sources",
+            readOnlyHint: true,
+            destructiveHint: false,
+            idempotentHint: true,
+            openWorldHint: false,
+          },
+        },
         fetch_llms_txt: {
           name: "fetch_llms_txt",
           description: "Fetches the content of a llms.txt url.",
           inputSchema: FetchLlmsTxtInputSchema,
           annotations: {
             title: "Fetch llms.txt content",
+            readOnlyHint: true,
+            destructiveHint: false,
+            idempotentHint: true,
+            openWorldHint: true,
+          },
+        },
+        fetch_openapi_json: {
+          name: "fetch_openapi_json",
+          description: "Fetches the content of a OpenAPI spec url.",
+          inputSchema: FetchOpenApiSpecInputSchema,
+          annotations: {
+            title: "Fetch OpenAPI spec content",
             readOnlyHint: true,
             destructiveHint: false,
             idempotentHint: true,
@@ -80,6 +109,13 @@ server.tool(
 );
 
 server.tool(
+  "list_api_spec_sources",
+  "This tool lists all available source urls where an OpenAPI spec can be fetched.",
+  (extra: RequestHandlerExtra<ServerRequest, ServerNotification>) =>
+    list_api_spec_sources(extra, openApiSpecs)
+);
+
+server.tool(
   "fetch_llms_txt",
   "Fetches the content of one or more llms.txt urls. Some llms.txt files compile a list of urls to other llms.txt file locations because listing their full documentation would bloat context. If the documentation you're looking for does not exist in the llms.txt, look for reference links to other llms.txt files and follow those.",
   { input: FetchLlmsTxtInputSchema },
@@ -87,6 +123,16 @@ server.tool(
     { input }: { input: z.infer<typeof FetchLlmsTxtInputSchema> },
     extra: RequestHandlerExtra<ServerRequest, ServerNotification>
   ) => fetch_llms_txt(input, extra, allowedDomains)
+);
+
+server.tool(
+  "fetch_openapi_spec",
+  "Fetches the content of one or more OpenAPI spec urls.",
+  { input: FetchOpenApiSpecInputSchema },
+  (
+    { input }: { input: z.infer<typeof FetchOpenApiSpecInputSchema> },
+    extra: RequestHandlerExtra<ServerRequest, ServerNotification>
+  ) => fetch_openapi_spec(input, extra, allowedDomains)
 );
 
 // --- Start Server --- //

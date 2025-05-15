@@ -23,7 +23,9 @@ export interface CliConfig {
 
 // Source loading functions
 /** @internal */
-export function loadDefaultSources(defaultsPath: string): Record<string, string> {
+export function loadDefaultSources(
+  defaultsPath: string
+): Record<string, string> {
   const defaultSources: Record<string, string> = {};
   try {
     const defaultsContent = fs.readFileSync(defaultsPath, "utf-8");
@@ -87,7 +89,8 @@ export function processSourceOptions(
 export function processDomainOptions(
   allowDomainOptions: string[] | undefined,
   allowDomainsOption: string | undefined,
-  docSources: Record<string, string>
+  docSources: Record<string, string>,
+  openApiSpecs: Record<string, string>
 ): Set<string> {
   const allowedDomains = new Set<string>();
   let userSpecifiedDomains = false;
@@ -112,6 +115,11 @@ export function processDomainOptions(
   // If no domains were specified, infer from docSources
   if (!userSpecifiedDomains) {
     inferDomainsFromSources(docSources, allowedDomains);
+  }
+
+  // If no domains were specified, infer from openApiSpecs
+  if (!userSpecifiedDomains) {
+    inferDomainsFromSources(openApiSpecs, allowedDomains);
   }
 
   return allowedDomains;
@@ -183,20 +191,24 @@ export function getDocSources(
 }
 
 /** @internal */
-export function getOpenApiSpecs(
-  options: OptionValues,
-  includeDefaults: boolean
-): Record<string, string> {
-  const openApiSpecs: Record<string, string> = {};
+export function getOpenApiSpecs(options: OptionValues): Record<string, string> {
+  let openApiSpecs: Record<string, string> = {};
 
-  // Process OpenAPI spec options
-  return processSourceOptions(
+  openApiSpecs = processSourceOptions(
     openApiSpecs,
-    options.openApiSpec,
+    options.openapiSpec,
     "--openapi-spec",
-    options.openApiSpecs,
+    options.openapiSpecs,
     "--openapi-specs"
   );
+
+  if (Object.keys(openApiSpecs).length === 0) {
+    console.error(
+      "Warning: No OpenAPI specs were configured (check defaults, --openapi-spec, --openapi-specs)."
+    );
+  }
+
+  return openApiSpecs;
 }
 
 // Main CLI parsing function
@@ -249,15 +261,16 @@ export function parseCliArgs(): CliConfig {
 
   // Process all options
   const docSources = getDocSources(options, includeDefaults);
-  const openApiSpecs = getOpenApiSpecs(options, includeDefaults);
+  const openApiSpecs = getOpenApiSpecs(options);
   const allowedDomains = processDomainOptions(
     options.allowDomain,
     options.allowDomains,
-    docSources
+    docSources,
+    openApiSpecs
   );
 
   // Create the final config
-  const config = { docSources, allowedDomains, openApiSpecs };
+  const config = { allowedDomains, docSources, openApiSpecs };
 
   // Log summary if in appropriate mode
   logConfigSummary(config);

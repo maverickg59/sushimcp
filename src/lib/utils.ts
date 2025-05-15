@@ -25,8 +25,6 @@ export function extractDomain(urlString: string): string | null {
   return null;
 }
 
-// /Users/christopherwhite/Develop/projects/sushimcp/sushimcp/dist/index.js --allow-domain http://localhost:8787 --openapi-spec http://localhost:8787/api/v1/openapi.json
-
 export function checkDomainAccess(
   targetInfo: TargetInfo,
   allowedDomains: Set<string>

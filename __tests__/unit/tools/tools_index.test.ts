@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import * as toolsExports from "#tools/index.js";
+import * as toolsExports from "#tools/index";
 
 describe("Tools Index", () => {
   it("should export the expected functions", () => {

@@ -8,7 +8,7 @@ vi.mock("commander");
 vi.mock("#lib/utils.js");
 vi.mock("#lib/cli_lib.js");
 
-import { loadDefaultSources, inferDomainsFromSources } from "#lib/cli.js";
+import { loadDefaultSources, inferDomainsFromSources } from "#lib/cli";
 
 describe("CLI Error Handling", () => {
   const consoleErrorSpy = vi
