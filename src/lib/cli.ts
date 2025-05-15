@@ -203,7 +203,7 @@ export function getDocSources(
     "--llms-txt-sources"
   );
 
-  if (options.url || options.urls) {
+  if (options?.url?.length > 0 || options?.urls?.length > 0) {
     console.warn(
       "Warning: The --url and --urls options are deprecated. Use --llms-txt-source and --llms-txt-sources instead."
     );
