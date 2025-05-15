@@ -459,14 +459,6 @@ exports[`Configuration Files > should match package.json snapshot 1`] = `
 exports[`Configuration Files > should match tsconfig.json snapshot 1`] = `
 "{
   "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@modelcontextprotocol/sdk": [
-        "./node_modules/@modelcontextprotocol/sdk/dist/esm"
-      ],
-      "#lib/*": ["./src/lib/*"],
-      "#tools/*": ["./src/tools/*"]
-    },
     "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
@@ -477,7 +469,15 @@ exports[`Configuration Files > should match tsconfig.json snapshot 1`] = `
     "outDir": "./dist",
     "rootDir": "./src",
     "lib": ["ES2022", "DOM"],
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@modelcontextprotocol/sdk": [
+        "./node_modules/@modelcontextprotocol/sdk/dist/esm"
+      ],
+      "#lib/*": ["./src/lib/*"],
+      "#tools/*": ["./src/tools/*"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
@@ -490,7 +490,6 @@ exports[`Configuration Files > should match vitest.config.mts snapshot 1`] = `
 import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
-  plugins: [tsconfigPaths()],
   test: {
     globals: true,
     environment: "node",
@@ -498,11 +497,13 @@ export default defineConfig({
     exclude: ["node_modules"],
     coverage: {
       enabled: true,
+      provider: "v8",
       reporter: ["text", "json", "html"],
       exclude: ["src/**/*.spec.ts", "dist", "node_modules"],
       include: ["src/**/*.ts"],
     },
   },
+  plugins: [tsconfigPaths({ projects: ["tsconfig.test.json"] })],
 });
 "
 `;

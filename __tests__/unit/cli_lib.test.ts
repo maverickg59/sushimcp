@@ -6,20 +6,17 @@ import {
   logConfigSummary,
   processSpaceSeparatedItems,
   processMultipleItems,
-} from "../../src/lib/cli_lib.js";
-import type { CliConfig } from "../../src/lib/cli.js";
+} from "#lib/cli_lib";
+import type { CliConfig } from "#lib/cli";
 
-// Actually view the implementation of logConfigSummary
-vi.mock("../../src/lib/cli_lib.js", async () => {
-  const actual = await vi.importActual<
-    typeof import("../../src/lib/cli_lib.js")
-  >("../../src/lib/cli_lib.js");
+vi.mock("#lib/cli_lib", async () => {
+  const actual = await vi.importActual<typeof import("#lib/cli_lib")>(
+    "#lib/cli_lib"
+  );
 
-  // Create a custom wrapper for logConfigSummary to intercept environment checks
   const mockLogConfigSummary = vi.fn((config) => {
-    // Only wrap for the silent test - otherwise use the original
     if (process.env.MCP_STDIO_MODE === "test-silent") {
-      return; // Do nothing for the silent test case
+      return;
     }
     return actual.logConfigSummary(config);
   });
@@ -31,23 +28,19 @@ vi.mock("../../src/lib/cli_lib.js", async () => {
 });
 
 describe("CLI Library Utilities", () => {
-  // Setup console spies
   const consoleErrorSpy = vi
     .spyOn(console, "error")
     .mockImplementation(() => {});
   const consoleInfoSpy = vi.spyOn(console, "info").mockImplementation(() => {});
 
-  // Store original environment
   const originalEnv = process.env;
 
   beforeEach(() => {
-    // Reset mocks and spies
     vi.resetAllMocks();
     process.env = { ...originalEnv };
   });
 
   afterEach(() => {
-    // Restore environment
     process.env = originalEnv;
   });
 
@@ -112,8 +105,6 @@ describe("CLI Library Utilities", () => {
     });
 
     it("should update value when overriding an existing source", () => {
-      // The function may not actually log anything when overriding
-      // so let's just test the core functionality
       const target: Record<string, string> = {
         vue: "https://initial-url.com/vue",
       };
@@ -124,7 +115,6 @@ describe("CLI Library Utilities", () => {
 
       addParsedSourceToTarget(parsed, target, "--source");
 
-      // Verify the value was updated
       expect(target["vue"]).toBe("https://new-url.com/vue/llms.txt");
     });
 
@@ -139,20 +129,18 @@ describe("CLI Library Utilities", () => {
         urlValue: "./relative/path",
       };
 
-      // Test with absolute path
       addParsedSourceToTarget(parsed1, target, "--source");
       expect(target["docs"]).toBeDefined();
-      
-      // Test with relative path
       addParsedSourceToTarget(parsed2, target, "--source");
       expect(target["config"]).toBeDefined();
     });
 
     it("should handle errors from invalid URLs and log them", () => {
-      // Mock URL constructor to throw error
       const originalURL = global.URL;
-      global.URL = function() { throw new Error("Invalid URL"); } as any;
-      
+      global.URL = function () {
+        throw new Error("Invalid URL");
+      } as any;
+
       try {
         const target: Record<string, string> = {};
         const parsed = {
@@ -161,11 +149,9 @@ describe("CLI Library Utilities", () => {
         };
 
         addParsedSourceToTarget(parsed, target, "--source");
-        
-        // Verify error was logged
+
         expect(consoleErrorSpy).toHaveBeenCalled();
       } finally {
-        // Restore original URL constructor
         global.URL = originalURL;
       }
     });
@@ -209,11 +195,7 @@ describe("CLI Library Utilities", () => {
 
       normalizeAndAddDomain("not a domain", domains, "--allow-domain");
 
-      // The implementation adds the domain regardless of validity
       expect(domains.has("not a domain")).toBe(true);
-
-      // It doesn't actually log any errors for domain validation
-      // as the function simply adds whatever is provided to the set
     });
 
     it("should handle wildcard domain", () => {
@@ -226,13 +208,13 @@ describe("CLI Library Utilities", () => {
 
     it("should handle empty domain entries", () => {
       const domains = new Set<string>();
-      
-      // Pass an empty string to trigger the error path in the function
+
       normalizeAndAddDomain("", domains, "--allow-domain");
-      
-      // Verify empty domain was not added to the set
+
       expect(domains.size).toBe(0);
-      expect(consoleErrorSpy).toHaveBeenCalledWith("Skipping empty --allow-domain entry.");
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+        "Skipping empty --allow-domain entry."
+      );
     });
   });
 
@@ -249,19 +231,13 @@ describe("CLI Library Utilities", () => {
 
       logConfigSummary(config);
 
-      // Verify that console.info was called at least once
       expect(consoleInfoSpy).toHaveBeenCalled();
 
-      // Instead of checking exact messages, verify it was called with expected number of times
-      // (header, docSources, openApiSpecs, allowedDomains, footer)
       expect(consoleInfoSpy).toHaveBeenCalledTimes(5);
     });
 
     it("should not log when MCP_STDIO_MODE is silent", () => {
-      // Clear any previous calls to the spy
       consoleInfoSpy.mockClear();
-
-      // Use our special test-silent mode that the mock will check for
       process.env.MCP_STDIO_MODE = "test-silent";
 
       const config: CliConfig = {
@@ -272,86 +248,78 @@ describe("CLI Library Utilities", () => {
 
       logConfigSummary(config);
 
-      // Verify our mock prevented any output
       expect(consoleInfoSpy).not.toHaveBeenCalled();
     });
   });
 
   describe("processSpaceSeparatedItems", () => {
-    // Instead of mocking the function, let's test what it actually does,
-    // which is returning the whole string as one item in our test cases
-
     it("should handle input strings", () => {
       const input = "item1 item2 item3";
       const processor = (item: string) => ({ value: item });
-      
+
       const results = processSpaceSeparatedItems(input, processor, "Test");
-      
-      // The function doesn't actually split by spaces in the tests
-      // due to the escape sequence not being interpreted correctly
+
       expect(results.length).toBeGreaterThan(0);
-      expect(results.some(r => r.value.includes("item1"))).toBe(true);
+      expect(results.some((r) => r.value.includes("item1"))).toBe(true);
     });
-    
+
     it("should return empty array for undefined input", () => {
       const processor = (item: string) => ({ value: item });
-      
+
       const results = processSpaceSeparatedItems(undefined, processor, "Test");
-      
+
       expect(results).toEqual([]);
     });
 
     it("should process input and filter null results", () => {
-      // This test just ensures the processor function is called
-      // and null results are filtered out
       const input = "test string";
       let processorCalled = false;
-      
+
       const processor = (item: string) => {
         processorCalled = true;
         if (item.includes("ignore")) return null;
         return { value: item };
       };
-      
+
       const results = processSpaceSeparatedItems(input, processor, "Test");
-      
+
       expect(processorCalled).toBe(true);
       expect(results.length).toBeGreaterThan(0);
     });
   });
-  
+
   describe("processMultipleItems", () => {
     it("should process an array of items", () => {
       const items = ["item1", "item2", "item3"];
       const processor = (item: string) => ({ value: item });
-      
+
       const results = processMultipleItems(items, processor, "Test");
-      
+
       expect(results).toHaveLength(3);
       expect(results[0].value).toBe("item1");
       expect(results[1].value).toBe("item2");
       expect(results[2].value).toBe("item3");
     });
-    
+
     it("should return empty array for undefined or empty input", () => {
       const processor = (item: string) => ({ value: item });
-      
+
       const results1 = processMultipleItems(undefined, processor, "Test");
       const results2 = processMultipleItems([], processor, "Test");
-      
+
       expect(results1).toEqual([]);
       expect(results2).toEqual([]);
     });
-    
+
     it("should filter out null results from processor", () => {
       const items = ["valid", "invalid", "valid2"];
       const processor = (item: string) => {
         if (item === "invalid") return null;
         return { value: item };
       };
-      
+
       const results = processMultipleItems(items, processor, "Test");
-      
+
       expect(results).toHaveLength(2);
       expect(results[0].value).toBe("valid");
       expect(results[1].value).toBe("valid2");

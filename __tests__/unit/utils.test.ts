@@ -6,7 +6,7 @@ import {
   fetchContent,
   getVersion,
   type TargetInfo,
-} from "../../src/lib/utils";
+} from "#lib/utils";
 import { URL } from "url";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";

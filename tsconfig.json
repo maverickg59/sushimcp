@@ -1,13 +1,5 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
-    "paths": {
-      "@modelcontextprotocol/sdk": [
-        "./node_modules/@modelcontextprotocol/sdk/dist/esm"
-      ],
-      "#lib/*": ["./src/lib/*"],
-      "#tools/*": ["./src/tools/*"]
-    },
     "target": "ES2022",
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
@@ -18,7 +10,15 @@
     "outDir": "./dist",
     "rootDir": "./src",
     "lib": ["ES2022", "DOM"],
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "paths": {
+      "@modelcontextprotocol/sdk": [
+        "./node_modules/@modelcontextprotocol/sdk/dist/esm"
+      ],
+      "#lib/*": ["./src/lib/*"],
+      "#tools/*": ["./src/tools/*"]
+    }
   },
   "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
