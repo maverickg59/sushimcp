@@ -40,3 +40,11 @@ Chris White: [Email](mailto:chris@chriswhite.rocks) | [GitHub](https://github.co
 ## License
 
 This project is licensed under the AGPL-3.0-or-later. See the `license.txt` file for details.
+
+<br>
+
+## Glama.ai Ratings
+
+<a href="https://glama.ai/mcp/servers/@maverickg59/sushimcp">
+  <img width="380" height="200" src="https://glama.ai/mcp/servers/@maverickg59/sushimcp/badge" />
+</a>
