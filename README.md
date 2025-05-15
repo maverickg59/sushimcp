@@ -1,10 +1,10 @@
-[![Verified on MseeP](https://mseep.ai/badge.svg)](https://mseep.ai/app/7b84b486-4ccb-4fc5-8d3b-74d398fa59c0)
-
 <div align="center">
 
 ![SushiMCP Hero Icon](assets/sushimcp_icon_name_slogan_logo_pink_bg.png)
 
 </div>
+
+[![Verified on MseeP](https://mseep.ai/badge.svg)](https://mseep.ai/app/7b84b486-4ccb-4fc5-8d3b-74d398fa59c0)
 
 # SushiMCP
 
