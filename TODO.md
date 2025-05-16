@@ -26,4 +26,4 @@
 
 ### llms.txt Sourcea
 
-["http://localhost:8787/api/v1/mcp"]
+["http://localhost:8787"]

@@ -32,7 +32,7 @@ describe("CLI Error Handling", () => {
 
       expect(consoleErrorSpy).toHaveBeenCalled();
       expect(consoleErrorSpy.mock.calls[0][0]).toContain(
-        "Error reading or parsing defaults file"
+        "Failed to load default sources: Test error reading file"
       );
       expect(result).toEqual({});
     });
@@ -76,8 +76,9 @@ describe("CLI Error Handling", () => {
 
       inferDomainsFromSources(sources, allowedDomains);
 
+      // Match the actual log message format which includes timestamp and log level
       expect(consoleWarnSpy).toHaveBeenCalledWith(
-        "Warning: No domains specified or inferred. Fetching might be restricted."
+        expect.stringContaining("No domains could be inferred from sources. Only local file access will be allowed.")
       );
     });
   });

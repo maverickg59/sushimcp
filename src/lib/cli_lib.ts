@@ -2,6 +2,7 @@
 import { URL } from "url";
 import * as path from "node:path";
 import { CliConfig } from "./cli.js";
+import { logger } from "./logger.js";
 
 export interface ParsedNameUrl {
   name: string;
@@ -17,7 +18,7 @@ export function parseNameValuePair(
 ): ParsedNameUrl | null {
   const parts = input.split(delimiter);
   if (parts.length < 2) {
-    console.error(
+    logger.error(
       `Invalid format: '${input}'. Expected 'name${delimiter}value'. Skipping.`
     );
     return null;
@@ -27,7 +28,7 @@ export function parseNameValuePair(
   const urlValue = parts.slice(1).join(delimiter).trim();
 
   if (!name || !urlValue) {
-    console.error(
+    logger.error(
       `Invalid format: '${input}'. Name or value part is empty. Skipping.`
     );
     return null;
@@ -54,7 +55,7 @@ export function validateAndAddSource(
       const absolutePath = path.resolve(urlValue);
       target[name] = absolutePath;
     } else {
-      console.error(
+      logger.error(
         `(${sourceOrigin}) Invalid URL or Path format for '${name}': '${urlValue}'. Skipping. Error: ${
           e instanceof Error ? e.message : e
         }`
@@ -140,7 +141,7 @@ export function normalizeAndAddDomain(
     if (normalizedDomain) {
       target.add(normalizedDomain);
     } else {
-      console.warn(`Skipping empty ${origin} entry.`);
+      logger.warn(`Skipping empty ${origin} entry.`);
     }
   }
 }
@@ -149,19 +150,19 @@ export function normalizeAndAddDomain(
  * Log the configuration summary if in appropriate mode
  */
 export function logConfigSummary(config: CliConfig): void {
-  console.info("\\n--- SushiMCP Configuration Summary ---");
-  console.info(
+  logger.info("\n--- SushiMCP Configuration Summary ---");
+  logger.info(
     `Documentation Sources: ${JSON.stringify(config.docSources, null, 2)}`
   );
-  console.info(
+  logger.info(
     `OpenAPI Specs: ${JSON.stringify(config.openApiSpecs, null, 2)}`
   );
-  console.info(
+  logger.info(
     `Allowed Fetch Domains: ${
       [...config.allowedDomains].join(", ") || "(None - local only?)"
     }`
   );
-  console.info("------------------------------------\\n");
+  logger.info("------------------------------------\n");
 }
 
 // Copyright (C) 2025 Christopher White

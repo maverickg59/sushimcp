@@ -1,4 +1,3 @@
-import { z } from "zod";
 import {
   CallToolResult,
   TextContent,
@@ -10,57 +9,77 @@ import {
   parseFetchTarget,
   fetchContent,
   checkDomainAccess,
-} from "#lib/index.js";
+  normalizeUrlInput,
+} from "#lib/utils.js";
+import { logger } from "#lib/logger.js";
+import { FetchLlmsTxtInputSchema, type UrlFetchInput } from "./tool_schemas.js";
 
-// --- Fetch llms.txt Content Tool ---
-export const FetchLlmsTxtInputSchema = z.union([
-  z.object({
-    url: z
-      .string()
-      .url("Input must contain a valid URL string under the 'url' key."),
-  }),
-  z.array(z.string().url("Each array item must be a valid URL string")),
-]);
+// Re-export the schema for backward compatibility
+export { FetchLlmsTxtInputSchema };
+
+/**
+ * Fetches the content of one or more llms.txt URLs.
+ * @param input - A single URL (as string or object) or an array of URLs to fetch
+ * @param extra - Extra request handler data
+ * @param allowedDomains - Set of allowed domains
+ * @returns A promise that resolves to the fetched content or an error
+ */
 
 export const fetch_llms_txt = async (
-  params: z.infer<typeof FetchLlmsTxtInputSchema>,
+  input: UrlFetchInput,
   extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
   allowedDomains: Set<string>
 ): Promise<CallToolResult> => {
-  console.info(`Processing fetch_llms_txt request with params:`, params);
+  logger.debug("Processing fetch_llms_txt request with input:", input);
 
-  try {
-    // Handle both input formats
-    const urls = Array.isArray(params) ? params : [params.url];
-    const results: TextContent[] = [];
+  // Normalize input to always be an array of { url: string } objects
+  const urlList = normalizeUrlInput(input);
+  const results: TextContent[] = [];
 
-    // Process each URL
-    for (const url of urls) {
+  for (const urlItem of urlList) {
+    const url = urlItem.url;
+
+    try {
+      logger.debug(`Processing URL: ${url}`);
+
+      // Validate the URL and get target info using the library function
       const targetInfo = await parseFetchTarget(url);
-
       if (targetInfo.type === "unsupported") {
-        throw new Error(`For URL ${url}: ${targetInfo.reason}`);
+        const errorMsg = `Unsupported URL format: ${targetInfo.reason}`;
+        logger.error(errorMsg);
+        throw new Error(errorMsg);
       }
 
+      logger.debug(`Target info:`, targetInfo);
+
+      // Check domain access using the library function
       checkDomainAccess(targetInfo, allowedDomains);
 
-      console.info(`Fetching llms.txt from ${url}`);
+      logger.debug(`Fetching content from: ${url}`);
 
+      // Fetch the content using the library function
       const fileContent = await fetchContent(targetInfo);
-
       results.push({
         type: "text",
         text: fileContent,
       });
-    }
 
-    return {
-      content: results,
-    };
-  } catch (error: any) {
-    console.error(`Error in fetch_llms_txt: ${error.message}`);
-    throw new Error(`Failed to process fetch request: ${error.message}`);
+      logger.debug(
+        `Successfully fetched ${fileContent.length} bytes from ${url}`
+      );
+    } catch (error) {
+      const errorMsg = `Failed to process fetch request for ${url}: ${
+        error instanceof Error ? error.message : String(error)
+      }`;
+      logger.error(errorMsg);
+      throw new Error(errorMsg);
+    }
   }
+
+  logger.debug(`Successfully processed ${results.length} URLs`);
+  return {
+    content: results,
+  };
 };
 
 // Copyright (C) 2025 Christopher White

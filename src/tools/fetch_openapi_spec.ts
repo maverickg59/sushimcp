@@ -1,4 +1,3 @@
-import { z } from "zod";
 import {
   CallToolResult,
   TextContent,
@@ -10,57 +9,77 @@ import {
   parseFetchTarget,
   fetchContent,
   checkDomainAccess,
-} from "#lib/index.js";
+  normalizeUrlInput,
+} from "#lib/utils.js";
+import { logger } from "#lib/logger.js";
+import { FetchOpenApiSpecInputSchema, type UrlFetchInput } from "./tool_schemas.js";
 
-// --- Fetch OpenAPI Spec Content Tool ---
-export const FetchOpenApiSpecInputSchema = z.union([
-  z.object({
-    url: z
-      .string()
-      .url("Input must contain a valid URL string under the 'url' key."),
-  }),
-  z.array(z.string().url("Each array item must be a valid URL string")),
-]);
+// Re-export the schema for backward compatibility
+export { FetchOpenApiSpecInputSchema };
+
+/**
+ * Fetches the content of one or more OpenAPI spec URLs.
+ * @param input - A single URL (as string or object) or an array of URLs to fetch
+ * @param extra - Extra request handler data
+ * @param allowedDomains - Set of allowed domains
+ * @returns A promise that resolves to the fetched content or an error
+ */
 
 export const fetch_openapi_spec = async (
-  params: z.infer<typeof FetchOpenApiSpecInputSchema>,
+  input: UrlFetchInput,
   extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
   allowedDomains: Set<string>
 ): Promise<CallToolResult> => {
-  console.info(`Processing fetch_openapi_spec request with params:`, params);
+  logger.debug("Processing fetch_openapi_spec request with input:", input);
 
-  try {
-    // Handle both input formats
-    const urls = Array.isArray(params) ? params : [params.url];
-    const results: TextContent[] = [];
+  // Normalize input to always be an array of { url: string } objects
+  const urlList = normalizeUrlInput(input);
+  const results: TextContent[] = [];
 
-    // Process each URL
-    for (const url of urls) {
+  for (const urlItem of urlList) {
+    const url = urlItem.url;
+
+    try {
+      logger.debug(`Processing OpenAPI spec URL: ${url}`);
+
+      // Validate the URL and get target info using the library function
       const targetInfo = await parseFetchTarget(url);
-
       if (targetInfo.type === "unsupported") {
-        throw new Error(`For URL ${url}: ${targetInfo.reason}`);
+        const errorMsg = `Unsupported URL format: ${targetInfo.reason}`;
+        logger.error(errorMsg);
+        throw new Error(errorMsg);
       }
 
+      logger.debug(`Target info:`, targetInfo);
+
+      // Check domain access using the library function
       checkDomainAccess(targetInfo, allowedDomains);
 
-      console.info(`Fetching OpenAPI spec from ${url}`);
+      logger.debug(`Fetching OpenAPI spec from: ${url}`);
 
+      // Fetch the content using the library function
       const fileContent = await fetchContent(targetInfo);
-
       results.push({
         type: "text",
         text: fileContent,
       });
-    }
 
-    return {
-      content: results,
-    };
-  } catch (error: any) {
-    console.error(`Error in fetch_openapi_spec: ${error.message}`);
-    throw new Error(`Failed to process fetch request: ${error.message}`);
+      logger.debug(
+        `Successfully fetched ${fileContent.length} bytes from ${url}`
+      );
+    } catch (error) {
+      const errorMsg = `Failed to process OpenAPI spec request for ${url}: ${
+        error instanceof Error ? error.message : String(error)
+      }`;
+      logger.error(errorMsg);
+      throw new Error(errorMsg);
+    }
   }
+
+  logger.debug(`Successfully processed ${results.length} OpenAPI specs`);
+  return {
+    content: results,
+  };
 };
 
 // Copyright (C) 2025 Christopher White

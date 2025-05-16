@@ -10,6 +10,7 @@ import {
   normalizeAndAddDomain,
   logConfigSummary,
 } from "./cli_lib.js";
+import { logger } from "./logger.js";
 
 const VERSION = getVersion();
 const __filename = fileURLToPath(import.meta.url);
@@ -42,9 +43,8 @@ export function loadDefaultSources(
       }
     }
   } catch (error) {
-    console.error(
-      `Error reading or parsing defaults file at ${defaultsPath}:`,
-      error
+    logger.error(
+      `Failed to load default sources: ${error instanceof Error ? error.message : error}`
     );
   }
   return defaultSources;
@@ -159,8 +159,8 @@ export function inferDomainsFromSources(
         allowedDomains.add(hostname);
       }
     } catch (e) {
-      console.error(
-        `Could not parse source URL '${url}' for domain inference. Error: ${
+      logger.error(
+        `Failed to parse source URL '${url}' for domain inference. Error: ${
           e instanceof Error ? e.message : String(e)
         }. Skipping.`
       );
@@ -169,12 +169,12 @@ export function inferDomainsFromSources(
 
   // Warning messages
   if (allowedDomains.size === 0 && Object.keys(sources).length > 0) {
-    console.warn(
+    logger.warn(
       "Warning: No remote URLs configured or parsed, and no explicit domains allowed. Fetching might be restricted to local files only."
     );
   } else if (allowedDomains.size === 0) {
-    console.warn(
-      "Warning: No domains specified or inferred. Fetching might be restricted."
+    logger.warn(
+      "No domains could be inferred from sources. Only local file access will be allowed."
     );
   }
 }
@@ -204,7 +204,7 @@ export function getDocSources(
   );
 
   if (options?.url?.length > 0 || options?.urls?.length > 0) {
-    console.warn(
+    logger.warn(
       "Warning: The --url and --urls options are deprecated. Use --llms-txt-source and --llms-txt-sources instead."
     );
   }
@@ -221,8 +221,8 @@ export function getDocSources(
   Object.assign(docSources, deprecatedDocSources);
 
   if (Object.keys(docSources).length === 0) {
-    console.warn(
-      "Warning: No documentation sources were configured (check defaults, --url, --urls)."
+    logger.warn(
+      "No documentation sources provided. Use --source to add sources."
     );
   }
 
@@ -242,8 +242,8 @@ export function getOpenApiSpecs(options: OptionValues): Record<string, string> {
   );
 
   if (Object.keys(openApiSpecs).length === 0) {
-    console.warn(
-      "Warning: No OpenAPI specs were configured (check defaults, --openapi-spec-source, --openapi-spec-sources)."
+    logger.warn(
+      "No OpenAPI specs provided. Use --openapi to add OpenAPI specs."
     );
   }
 

@@ -169,8 +169,9 @@ describe("checkDomainAccess", () => {
     const allowedDomains = new Set(["example.com"]);
 
     checkDomainAccess(targetInfo, allowedDomains);
+    // Verify the log message contains the expected content
     expect(consoleInfoSpy).toHaveBeenCalledWith(
-      "Domain 'example.com' is allowed."
+      expect.stringContaining("Domain 'example.com' is allowed.")
     );
   });
 });
@@ -287,8 +288,9 @@ describe("fetchContent", () => {
     };
 
     await fetchContent(targetInfo);
+    // Verify the log message contains the expected fetch URL
     expect(consoleInfoSpy).toHaveBeenCalledWith(
-      "Fetching remote URL: https://example.com/"
+      expect.stringContaining("Fetching remote URL: https://example.com/")
     );
   });
 
@@ -335,8 +337,9 @@ describe("fetchContent", () => {
     const content = await fetchContent(targetInfo);
     expect(content).toBe("file url content");
     expect(fs.readFile).toHaveBeenCalledWith("/local/file/path", "utf-8");
+    // Verify the log message contains the expected file path
     expect(consoleInfoSpy).toHaveBeenCalledWith(
-      "Reading local file path from file: URL: /local/file/path"
+      expect.stringContaining("Reading local file path from file: URL: /local/file/path")
     );
   });
 

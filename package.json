@@ -46,7 +46,7 @@
     "#tools/*": "./src/tools/*.js"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.10.2",
+    "@modelcontextprotocol/sdk": "^1.11.3",
     "commander": "^12.1.0",
     "zod": "^3.23.8"
   },

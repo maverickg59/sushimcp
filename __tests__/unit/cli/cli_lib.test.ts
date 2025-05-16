@@ -195,8 +195,9 @@ describe("CLI Library Utilities", () => {
       normalizeAndAddDomain("", domains, "--allow-domain");
 
       expect(domains.size).toBe(0);
+      // Match the actual log message format which includes timestamp and log level
       expect(consoleWarnSpy).toHaveBeenCalledWith(
-        "Skipping empty --allow-domain entry."
+        expect.stringContaining("Skipping empty --allow-domain entry.")
       );
     });
   });

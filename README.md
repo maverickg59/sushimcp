@@ -18,7 +18,14 @@ SushiMCP is a model context protocol server designed to assist developers with d
 {
   "sushimcp": {
     "command": "npx",
-    "args": ["@chriswhiterocks/sushimcp@latest"]
+    "args": [
+      "-y",
+      "@chriswhiterocks/sushimcp@latest",
+      "--llms-txt-source",
+      "cool_project:https://coolproject.dev/llms-full.txt",
+      "--openapi-spec-source",
+      "local_api:http://localhost:8787/api/v1/openapi.json"
+    ]
   }
 }
 ```

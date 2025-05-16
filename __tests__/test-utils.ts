@@ -1,9 +1,32 @@
 import { vi } from "vitest";
 
 // Common console mocks
-export const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-export const consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
-export const consoleInfoSpy = vi.spyOn(console, "info").mockImplementation(() => {});
+export const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation((...args) => {
+  // Extract the actual message from the formatted log
+  const message = args[0];
+  if (typeof message === 'string' && message.includes('[ERROR]')) {
+    // Pass through the full formatted message for error logs
+    console.log(...args);
+  }
+});
+
+export const consoleWarnSpy = vi.spyOn(console, "warn").mockImplementation((...args) => {
+  // Extract the actual message from the formatted log
+  const message = args[0];
+  if (typeof message === 'string' && message.includes('[WARN]')) {
+    // For test assertions, we'll match against the full formatted message
+    console.log(...args);
+  }
+});
+
+export const consoleInfoSpy = vi.spyOn(console, "info").mockImplementation((...args) => {
+  // Extract the actual message from the formatted log
+  const message = args[0];
+  if (typeof message === 'string' && message.includes('[INFO]')) {
+    // For test assertions, we'll match against the full formatted message
+    console.log(...args);
+  }
+});
 
 // Common mock implementations
 export const mockPathResolution = (path: any) => ({

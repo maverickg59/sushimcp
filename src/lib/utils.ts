@@ -2,6 +2,7 @@ import { URL, fileURLToPath } from "url";
 import fs from "fs/promises";
 import path from "path";
 import { readFileSync } from "fs";
+import { logger } from "./logger.js";
 
 // --- Type Definitions ---
 export type TargetInfo =
@@ -17,9 +18,11 @@ export function extractDomain(urlString: string): string | null {
     if (url.protocol === "http:" || url.protocol === "https:") {
       return url.hostname.toLowerCase();
     }
-  } catch (e) {
-    console.error(
-      `Could not parse '${urlString}' as URL for domain extraction.`
+  } catch (error: unknown) {
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
+    logger.error(
+      `Invalid URL format: ${errorMessage}. Only http, https, and file protocols are supported.`
     );
   }
   return null;
@@ -31,21 +34,19 @@ export function checkDomainAccess(
 ): void {
   if (targetInfo.type === "remote") {
     if (!allowedDomains.has("*") && !allowedDomains.has(targetInfo.hostname)) {
-      console.error(
-        `Access denied: Domain '${
-          targetInfo.hostname
-        }' is not in the allowed list: ${[...allowedDomains].join(", ")}`
+      logger.error(
+        `Domain '${targetInfo.hostname}' is not in the allowed domains list.`
       );
       throw new Error(
         `Access denied: Fetching from domain '${targetInfo.hostname}' is not allowed by server configuration. Ask user to add domain to allow list.`
       );
     }
-    console.info(`Domain '${targetInfo.hostname}' is allowed.`);
+    logger.info(`Domain '${targetInfo.hostname}' is allowed.`);
   } else if (
     targetInfo.type === "localFileUrl" ||
     targetInfo.type === "localPath"
   ) {
-    console.warn("Local file access permitted.");
+    logger.warn("Local file access permitted.");
   } else {
     throw new Error(
       `Internal error: Unsupported target type '${targetInfo.type}' during access check.`
@@ -53,7 +54,6 @@ export function checkDomainAccess(
   }
 }
 
-// --- Parsing and Fetching ---
 export async function parseFetchTarget(
   targetUrlString: string
 ): Promise<TargetInfo> {
@@ -117,18 +117,18 @@ export async function parseFetchTarget(
 export async function fetchContent(targetInfo: TargetInfo): Promise<string> {
   switch (targetInfo.type) {
     case "remote": {
-      console.info(`Fetching remote URL: ${targetInfo.url.toString()}`);
+      logger.info(`Fetching remote URL: ${targetInfo.url.toString()}`);
       const response = await fetch(targetInfo.url.toString());
       if (!response.ok) throw new Error(`HTTP error ${response.status}`);
       return await response.text();
     }
     case "localFileUrl":
-      console.info(
+      logger.info(
         `Reading local file path from file: URL: ${targetInfo.filePath}`
       );
       return await fs.readFile(targetInfo.filePath, "utf-8");
     case "localPath":
-      console.info(
+      logger.info(
         `Reading local file path directly: ${targetInfo.resolvedPath}`
       );
       return await fs.readFile(targetInfo.resolvedPath, "utf-8");
@@ -147,7 +147,19 @@ export async function fetchContent(targetInfo: TargetInfo): Promise<string> {
   }
 }
 
-// --- Utility Functions ---
+export type UrlInput = { url: string } | string;
+
+export const normalizeUrlInput = (
+  input: UrlInput | UrlInput[]
+): { url: string }[] => {
+  if (Array.isArray(input)) {
+    return input.map((item) =>
+      typeof item === "string" ? { url: item } : item
+    );
+  }
+  return [typeof input === "string" ? { url: input } : input];
+};
+
 export function getVersion(): string {
   const __filename = fileURLToPath(import.meta.url);
   let dir = path.dirname(__filename);
