@@ -10,12 +10,9 @@ import {
   fetchContent,
   checkDomainAccess,
   normalizeUrlInput,
-} from "#lib/utils.js";
-import { logger } from "#lib/logger.js";
-import { FetchLlmsTxtInputSchema, type UrlFetchInput } from "./tool_schemas.js";
-
-// Re-export the schema for backward compatibility
-export { FetchLlmsTxtInputSchema };
+  logger,
+} from "#lib/index.js";
+import { type UrlFetchInput } from "./tool_schemas.js";
 
 /**
  * Fetches the content of one or more llms.txt URLs.

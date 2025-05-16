@@ -2,6 +2,7 @@
 import { URL } from "url";
 import * as path from "node:path";
 import { CliConfig } from "./cli.js";
+import { extractDomain } from "./utils.js";
 import { logger } from "./logger.js";
 
 export interface ParsedNameUrl {
@@ -130,19 +131,10 @@ export function normalizeAndAddDomain(
   target: Set<string>,
   origin: string
 ): void {
-  try {
-    // Try to parse as URL first
-    const url = new URL(domain.trim());
-    target.add(url.hostname.toLowerCase());
-  } catch {
-    // If not a URL, treat as a plain domain
-    const normalizedDomain = domain.trim().toLowerCase();
-
-    if (normalizedDomain) {
-      target.add(normalizedDomain);
-    } else {
-      logger.warn(`Skipping empty ${origin} entry.`);
-    }
+  const extractedDomain = extractDomain(domain.trim());
+  if (extractedDomain) {
+    target.add(extractedDomain);
+    logger.info(`Added domain ${extractedDomain} from ${origin}`);
   }
 }
 

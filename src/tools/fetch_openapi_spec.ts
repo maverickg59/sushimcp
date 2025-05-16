@@ -10,12 +10,9 @@ import {
   fetchContent,
   checkDomainAccess,
   normalizeUrlInput,
-} from "#lib/utils.js";
-import { logger } from "#lib/logger.js";
-import { FetchOpenApiSpecInputSchema, type UrlFetchInput } from "./tool_schemas.js";
-
-// Re-export the schema for backward compatibility
-export { FetchOpenApiSpecInputSchema };
+  logger,
+} from "#lib/index.js";
+import { type UrlFetchInput } from "./tool_schemas.js";
 
 /**
  * Fetches the content of one or more OpenAPI spec URLs.

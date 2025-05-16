@@ -115,11 +115,14 @@ export function processDomainOptions(
     });
   }
 
-  // If no domains were specified, infer from sources
-  if (!userSpecifiedDomains) {
-    inferDomainsFromSources(openApiSpecs, allowedDomains);
-    inferDomainsFromSources(docSources, allowedDomains);
+  // Always add explicitly allowed domains from CLI flags
+  if (userSpecifiedDomains) {
+    logger.info("Using explicitly allowed domains from CLI flags");
   }
+
+  // Add inferred domains from sources (always add these in addition to any explicitly allowed domains)
+  inferDomainsFromSources(openApiSpecs, allowedDomains);
+  inferDomainsFromSources(docSources, allowedDomains);
 
   // Process individual --deny-domain options
   if (denyDomainOptions && denyDomainOptions.length > 0) {

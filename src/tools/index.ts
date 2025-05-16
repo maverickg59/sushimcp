@@ -6,8 +6,7 @@ export * from "./list_openapi_spec_sources.js";
 
 // Export schemas and types
 export {
-  FetchLlmsTxtInputSchema,
-  FetchOpenApiSpecInputSchema,
+  UrlFetchInputSchema,
   type UrlInput,
   type UrlArrayInput,
 } from "./tool_schemas.js";

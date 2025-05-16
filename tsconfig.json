@@ -17,7 +17,8 @@
         "./node_modules/@modelcontextprotocol/sdk/dist/esm"
       ],
       "#lib/*": ["./src/lib/*"],
-      "#tools/*": ["./src/tools/*"]
+      "#tools/*": ["./src/tools/*"],
+      "#resources/*": ["./src/resources/*"]
     }
   },
   "include": ["src/**/*"],

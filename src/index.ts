@@ -12,12 +12,10 @@ import {
   fetch_llms_txt,
   fetch_openapi_spec,
   list_openapi_spec_sources,
-  FetchLlmsTxtInputSchema,
-  FetchOpenApiSpecInputSchema,
+  UrlFetchInputSchema,
 } from "#tools/index.js";
-import { parseCliArgs, getVersion } from "#lib/index.js";
-import { logger } from "#lib/logger.js";
-import { z } from "zod";
+import { parseCliArgs, getVersion, logger } from "#lib/index.js";
+import { processDefaultsResources } from "#resources/index.js";
 
 // --- Parse CLI Arguments --- //
 const { docSources, allowedDomains, openApiSpecs } = parseCliArgs();
@@ -52,6 +50,7 @@ const server = new McpServer(
   },
   {
     capabilities: {
+      resources: {},
       tools: {
         list_llms_txt_sources: {
           name: "list_llms_txt_sources",
@@ -79,7 +78,7 @@ const server = new McpServer(
         fetch_llms_txt: {
           name: "fetch_llms_txt",
           description: "Fetches the content of a llms.txt url.",
-          inputSchema: FetchLlmsTxtInputSchema,
+          inputSchema: UrlFetchInputSchema,
           annotations: {
             title: "Fetch llms.txt content",
             readOnlyHint: true,
@@ -91,7 +90,7 @@ const server = new McpServer(
         fetch_openapi_spec: {
           name: "fetch_openapi_spec",
           description: "Fetches the content of a OpenAPI spec url.",
-          inputSchema: FetchOpenApiSpecInputSchema,
+          inputSchema: UrlFetchInputSchema,
           annotations: {
             title: "Fetch OpenAPI spec content",
             readOnlyHint: true,
@@ -123,7 +122,7 @@ server.tool(
   "fetch_llms_txt",
   "Fetches the content of one or more llms.txt URLs. Some llms.txt files compile a list of urls to other llms.txt file locations because listing their full documentation would bloat context. If the documentation you're looking for does not exist in the llms.txt, look for reference links to other llms.txt files and follow those.",
   {
-    input: FetchLlmsTxtInputSchema.describe(
+    input: UrlFetchInputSchema.describe(
       "URL string, URL object, or array of URL/objects to fetch llms.txt from"
     ),
   },
@@ -144,7 +143,7 @@ server.tool(
   "fetch_openapi_spec",
   "Fetches the content of one or more OpenAPI spec URLs.",
   {
-    input: FetchOpenApiSpecInputSchema.describe(
+    input: UrlFetchInputSchema.describe(
       "URL string, URL object, or array of URL/objects to fetch OpenAPI specs from"
     ),
   },
@@ -160,6 +159,21 @@ server.tool(
     );
   }
 );
+
+// Process and register default resources
+const resources = processDefaultsResources();
+resources.forEach(({ id, uri, name, description, mimetype, handler }) => {
+  server.resource(
+    id,
+    uri,
+    {
+      name,
+      description,
+      mimetype,
+    },
+    handler
+  );
+});
 
 // --- Start Server --- //
 try {
