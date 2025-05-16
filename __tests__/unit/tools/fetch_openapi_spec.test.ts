@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { fetch_openapi_spec } from "#tools/fetch_openapi_spec";
 import * as utils from "#lib/utils";
+import { logger } from "#lib/index";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import type {
   ServerRequest,
@@ -52,7 +53,7 @@ describe("fetch_openapi_spec", () => {
     vi.mocked(utils.fetchContent).mockResolvedValueOnce(mockApiSpec);
 
     // Mock the logger
-    const debugSpy = vi.spyOn(console, "debug").mockImplementation(() => {});
+    const debugSpy = vi.spyOn(logger, "debug").mockImplementation(() => {});
 
     const result = await fetch_openapi_spec(
       { url: "https://example.com/openapi.json" },
@@ -81,9 +82,7 @@ describe("fetch_openapi_spec", () => {
     expect(utils.fetchContent).toHaveBeenCalledWith(mockTargetInfo);
 
     expect(result).toEqual({
-      content: [
-        { type: "text", text: mockApiSpec },
-      ],
+      content: [{ type: "text", text: mockApiSpec }],
     });
 
     debugSpy.mockRestore();
@@ -126,11 +125,14 @@ describe("fetch_openapi_spec", () => {
       .mockResolvedValueOnce(mockApiSpec2);
 
     // Mock the logger
-    const debugSpy = vi.spyOn(console, "debug").mockImplementation(() => {});
+    const debugSpy = vi.spyOn(logger, "debug").mockImplementation(() => {});
 
     // Call function with array input
     const result = await fetch_openapi_spec(
-      ["https://example.com/openapi.json", "https://api.example.org/openapi.json"],
+      [
+        "https://example.com/openapi.json",
+        "https://api.example.org/openapi.json",
+      ],
       mockExtra,
       mockAllowedDomains
     );
@@ -171,7 +173,7 @@ describe("fetch_openapi_spec", () => {
     );
 
     // Mock the logger
-    const debugSpy = vi.spyOn(console, "debug").mockImplementation(() => {});
+    const debugSpy = vi.spyOn(logger, "debug").mockImplementation(() => {});
 
     await fetch_openapi_spec(
       { url: "https://example.com/openapi.json" },
@@ -365,7 +367,7 @@ describe("fetch_openapi_spec", () => {
     const error = new Error("Invalid URL");
     vi.mocked(utils.parseFetchTarget).mockRejectedValueOnce(error);
 
-    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const errorSpy = vi.spyOn(logger, "error").mockImplementation(() => {});
 
     const errorResult = await fetch_openapi_spec(
       { url: "invalid-url" },

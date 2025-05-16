@@ -2,8 +2,8 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { 
-  consoleErrorSpy, 
-  consoleWarnSpy, 
+  loggerErrorSpy, 
+  loggerWarnSpy, 
   mockPathResolution,
   resetAllMocks 
 } from "../../test-utils";
@@ -30,8 +30,8 @@ describe("CLI Error Handling", () => {
 
       const result = loadDefaultSources("/path/to/defaults.yaml");
 
-      expect(consoleErrorSpy).toHaveBeenCalled();
-      expect(consoleErrorSpy.mock.calls[0][0]).toContain(
+      expect(loggerErrorSpy).toHaveBeenCalled();
+      expect(loggerErrorSpy.mock.calls[0][0]).toContain(
         "Failed to load default sources: Test error reading file"
       );
       expect(result).toEqual({});
@@ -40,7 +40,7 @@ describe("CLI Error Handling", () => {
 
   describe("inferDomainsFromSources", () => {
     it("should handle URL parsing errors", () => {
-      consoleErrorSpy.mockReset();
+      loggerErrorSpy.mockReset();
 
       const sources = {
         invalid: "not-a-valid-url",
@@ -49,11 +49,11 @@ describe("CLI Error Handling", () => {
 
       inferDomainsFromSources(sources, allowedDomains);
 
-      expect(consoleWarnSpy).toHaveBeenCalled();
+      expect(loggerWarnSpy).toHaveBeenCalled();
     });
 
     it("should respect wildcard domains and limit domain inference", () => {
-      consoleErrorSpy.mockReset();
+      loggerErrorSpy.mockReset();
 
       const allowedDomains = new Set<string>(["*"]);
 
@@ -77,7 +77,7 @@ describe("CLI Error Handling", () => {
       inferDomainsFromSources(sources, allowedDomains);
 
       // Match the actual log message format which includes timestamp and log level
-      expect(consoleWarnSpy).toHaveBeenCalledWith(
+      expect(loggerWarnSpy).toHaveBeenCalledWith(
         expect.stringContaining("No domains could be inferred from sources. Only local file access will be allowed.")
       );
     });

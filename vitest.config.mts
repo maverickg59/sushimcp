@@ -7,6 +7,7 @@ export default defineConfig({
     environment: "node",
     include: ["__tests__/**/*.test.ts"],
     exclude: ["node_modules"],
+    reporters: ["default", "html"],
     coverage: {
       enabled: true,
       provider: "v8",
@@ -17,6 +18,7 @@ export default defineConfig({
         "node_modules",
         "src/lib/index.ts",
         "src/tools/index.ts",
+        "src/resources/index.ts",
       ],
       include: ["src/**/*.ts"],
     },

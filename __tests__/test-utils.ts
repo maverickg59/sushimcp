@@ -1,4 +1,5 @@
 import { vi } from "vitest";
+import { logger } from "../src/lib/index.js";
 
 // Common console mocks
 export const consoleErrorSpy = vi.spyOn(console, "error").mockImplementation((...args) => {
@@ -26,6 +27,26 @@ export const consoleInfoSpy = vi.spyOn(console, "info").mockImplementation((...a
     // For test assertions, we'll match against the full formatted message
     console.log(...args);
   }
+});
+
+// Logger mocks that combine with the console spies
+export const loggerErrorSpy = vi.spyOn(logger, "error").mockImplementation((...args) => {
+  // Forward to console.error which is already spied on
+  console.error(...args);
+});
+
+export const loggerWarnSpy = vi.spyOn(logger, "warn").mockImplementation((...args) => {
+  // Forward to console.warn which is already spied on
+  console.warn(...args);
+});
+
+export const loggerInfoSpy = vi.spyOn(logger, "info").mockImplementation((...args) => {
+  // Forward to console.info which is already spied on
+  console.info(...args);
+});
+
+export const loggerDebugSpy = vi.spyOn(logger, "debug").mockImplementation((...args) => {
+  // Just capture calls, don't forward
 });
 
 // Common mock implementations
@@ -69,6 +90,10 @@ export const resetAllMocks = () => {
   consoleErrorSpy.mockClear();
   consoleWarnSpy.mockClear();
   consoleInfoSpy.mockClear();
+  loggerErrorSpy.mockClear();
+  loggerWarnSpy.mockClear();
+  loggerInfoSpy.mockClear();
+  loggerDebugSpy.mockClear();
   vi.clearAllMocks();
 };
 
@@ -89,6 +114,10 @@ export default {
   consoleErrorSpy,
   consoleWarnSpy,
   consoleInfoSpy,
+  loggerErrorSpy,
+  loggerWarnSpy,
+  loggerInfoSpy,
+  loggerDebugSpy,
   mockPathResolution,
   mockFileSystem,
   resetAllMocks,

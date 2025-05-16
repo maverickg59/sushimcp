@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { fetch_llms_txt } from "#tools/fetch_llms_txt";
 import * as utils from "#lib/utils";
+import { logger } from "#lib/index";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import type {
   ServerRequest,
@@ -49,7 +50,7 @@ describe("fetch_llms_txt", () => {
     );
 
     // Mock the logger
-    const debugSpy = vi.spyOn(console, "debug").mockImplementation(() => {});
+    const debugSpy = vi.spyOn(logger, "debug").mockImplementation(() => {});
 
     const result = await fetch_llms_txt(
       { url: "https://example.com/llms.txt" },
@@ -112,7 +113,7 @@ describe("fetch_llms_txt", () => {
       .mockResolvedValueOnce("Content from second source");
 
     // Mock the logger
-    const debugSpy = vi.spyOn(console, "debug").mockImplementation(() => {});
+    const debugSpy = vi.spyOn(logger, "debug").mockImplementation(() => {});
 
     // Call function with array input
     const result = await fetch_llms_txt(
@@ -155,7 +156,7 @@ describe("fetch_llms_txt", () => {
     vi.mocked(utils.fetchContent).mockResolvedValueOnce("Test content");
 
     // Mock the logger
-    const debugSpy = vi.spyOn(console, "debug").mockImplementation(() => {});
+    const debugSpy = vi.spyOn(logger, "debug").mockImplementation(() => {});
 
     await fetch_llms_txt(
       { url: "https://example.com/llms.txt" },
@@ -396,7 +397,7 @@ describe("fetch_llms_txt", () => {
     );
 
     // Mock the logger
-    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const errorSpy = vi.spyOn(logger, "error").mockImplementation(() => {});
 
     await expect(
       fetch_llms_txt(
@@ -437,7 +438,7 @@ describe("fetch_llms_txt", () => {
 
     // Mock parseFetchTarget to handle both URLs
     vi.mocked(utils.parseFetchTarget)
-      .mockResolvedValueOnce(mockTarget1)  // For string URL
+      .mockResolvedValueOnce(mockTarget1) // For string URL
       .mockResolvedValueOnce(mockTarget2); // For object URL
 
     // Mock fetchContent for both URLs
@@ -448,8 +449,8 @@ describe("fetch_llms_txt", () => {
     // Call with mixed array: one string, one object
     const result = await fetch_llms_txt(
       [
-        "https://example.com/llms.txt",  // string
-        { url: "https://docs.example.org/llms.txt" }  // object
+        "https://example.com/llms.txt", // string
+        { url: "https://docs.example.org/llms.txt" }, // object
       ],
       mockExtra,
       mockAllowedDomains
@@ -457,18 +458,22 @@ describe("fetch_llms_txt", () => {
 
     // Verify both URLs were processed
     expect(utils.parseFetchTarget).toHaveBeenCalledTimes(2);
-    expect(utils.parseFetchTarget).toHaveBeenCalledWith("https://example.com/llms.txt");
-    expect(utils.parseFetchTarget).toHaveBeenCalledWith("https://docs.example.org/llms.txt");
-    
+    expect(utils.parseFetchTarget).toHaveBeenCalledWith(
+      "https://example.com/llms.txt"
+    );
+    expect(utils.parseFetchTarget).toHaveBeenCalledWith(
+      "https://docs.example.org/llms.txt"
+    );
+
     // Verify both fetchContent calls were made
     expect(utils.fetchContent).toHaveBeenCalledTimes(2);
-    
+
     // Verify the results
     expect(result).toEqual({
       content: [
         { type: "text", text: "Content from string URL" },
-        { type: "text", text: "Content from object URL" }
-      ]
+        { type: "text", text: "Content from object URL" },
+      ],
     });
   });
 
@@ -485,7 +490,7 @@ describe("fetch_llms_txt", () => {
     );
 
     // Mock the logger
-    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const errorSpy = vi.spyOn(logger, "error").mockImplementation(() => {});
 
     await expect(
       fetch_llms_txt(

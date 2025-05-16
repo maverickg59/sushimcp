@@ -6,20 +6,14 @@ import {
   fetchContent,
   getVersion,
   type TargetInfo,
-} from "#lib/utils";
+  logger,
+} from "#lib/index";
 import { URL } from "url";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import * as url from "url";
 import * as nodeFs from "fs";
-import {
-  consoleErrorSpy,
-  consoleWarnSpy,
-  consoleInfoSpy,
-  mockPathResolution,
-  mockFileSystem,
-  resetAllMocks,
-} from "../../test-utils";
+import { mockPathResolution, mockFileSystem } from "../../test-utils";
 
 Object.defineProperty(import.meta, "url", {
   value: "file:///fake/path/src/lib/utils.ts",
@@ -89,7 +83,7 @@ describe("extractDomain", () => {
 });
 
 describe("checkDomainAccess", () => {
-  const consoleInfoSpy = vi.spyOn(console, "info").mockImplementation(() => {});
+  const loggerInfoSpy = vi.spyOn(logger, "info").mockImplementation(() => {});
   const originalEnv = process.env;
 
   beforeEach(() => {
@@ -170,7 +164,7 @@ describe("checkDomainAccess", () => {
 
     checkDomainAccess(targetInfo, allowedDomains);
     // Verify the log message contains the expected content
-    expect(consoleInfoSpy).toHaveBeenCalledWith(
+    expect(loggerInfoSpy).toHaveBeenCalledWith(
       expect.stringContaining("Domain 'example.com' is allowed.")
     );
   });
@@ -279,7 +273,7 @@ describe("fetchContent", () => {
       text: vi.fn().mockResolvedValue("content"),
     };
     global.fetch = vi.fn().mockResolvedValue(mockResponse as any);
-    const consoleInfoSpy = vi.spyOn(console, "info");
+    const loggerInfoSpy = vi.spyOn(logger, "info");
 
     const targetInfo = {
       type: "remote" as const,
@@ -289,7 +283,7 @@ describe("fetchContent", () => {
 
     await fetchContent(targetInfo);
     // Verify the log message contains the expected fetch URL
-    expect(consoleInfoSpy).toHaveBeenCalledWith(
+    expect(loggerInfoSpy).toHaveBeenCalledWith(
       expect.stringContaining("Fetching remote URL: https://example.com/")
     );
   });
@@ -326,7 +320,7 @@ describe("fetchContent", () => {
 
   it("should fetch local file content from file URL", async () => {
     vi.mocked(fs.readFile).mockResolvedValueOnce("file url content" as any);
-    const consoleInfoSpy = vi.spyOn(console, "info");
+    const loggerInfoSpy = vi.spyOn(logger, "info");
 
     const targetInfo = {
       type: "localFileUrl" as const,
@@ -338,8 +332,10 @@ describe("fetchContent", () => {
     expect(content).toBe("file url content");
     expect(fs.readFile).toHaveBeenCalledWith("/local/file/path", "utf-8");
     // Verify the log message contains the expected file path
-    expect(consoleInfoSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Reading local file path from file: URL: /local/file/path")
+    expect(loggerInfoSpy).toHaveBeenCalledWith(
+      expect.stringContaining(
+        "Reading local file path from file: URL: /local/file/path"
+      )
     );
   });
 

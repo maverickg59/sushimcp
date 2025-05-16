@@ -51,6 +51,9 @@ lib-cov
 coverage
 *.lcov
 
+# Vitest HTML output
+html
+
 # nyc test coverage
 .nyc_output
 
@@ -411,6 +414,7 @@ exports[`Configuration Files > should match package.json snapshot 1`] = `
   "devDependencies": {
     "@types/node": "[version]",
     "@vitest/coverage-v8": "[version]",
+    "@vitest/ui": "[version]",
     "husky": "[version]",
     "tsup": "[version]",
     "typescript": "[version]",
@@ -451,6 +455,7 @@ exports[`Configuration Files > should match package.json snapshot 1`] = `
     "snapshot:update": "vitest run -u",
     "start": "node dist/index.js --llms-txt-source hono:https://hono.dev/llms-full.txt",
     "test": "vitest run",
+    "test:ui": "vitest --ui",
     "test:watch": "vitest watch",
   },
   "type": "module",
@@ -478,7 +483,8 @@ exports[`Configuration Files > should match tsconfig.json snapshot 1`] = `
         "./node_modules/@modelcontextprotocol/sdk/dist/esm"
       ],
       "#lib/*": ["./src/lib/*"],
-      "#tools/*": ["./src/tools/*"]
+      "#tools/*": ["./src/tools/*"],
+      "#resources/*": ["./src/resources/*"]
     }
   },
   "include": ["src/**/*"],
@@ -497,6 +503,7 @@ export default defineConfig({
     environment: "node",
     include: ["__tests__/**/*.test.ts"],
     exclude: ["node_modules"],
+    reporters: ["default", "html"],
     coverage: {
       enabled: true,
       provider: "v8",
@@ -507,6 +514,7 @@ export default defineConfig({
         "node_modules",
         "src/lib/index.ts",
         "src/tools/index.ts",
+        "src/resources/index.ts",
       ],
       include: ["src/**/*.ts"],
     },

@@ -34,7 +34,11 @@ export const processDefaultsResources = (): ProcessedResource[] => {
 
     const resourceDescription = key
       .split("_")
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .map((word, index) => 
+        index === 0 
+          ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
+          : word.toLowerCase()
+      )
       .join(" ")
       .concat(" llms.txt");
 
