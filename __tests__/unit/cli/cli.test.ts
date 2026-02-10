@@ -39,7 +39,7 @@ describe("CLI Module", () => {
     process.env = { ...originalEnv };
 
     // Setup common Commander mocks with method chaining
-    vi.mocked(Command).mockImplementation(() => {
+    vi.mocked(Command).mockImplementation(function () {
       const mockCommand = {
         name: mockNameFn,
         description: mockDescriptionFn,
@@ -79,13 +79,13 @@ describe("CLI Module", () => {
     vi.mocked(cliLib.addParsedSourceToTarget).mockImplementation(
       (parsed, target, flag) => {
         target[parsed.name] = parsed.urlValue;
-      }
+      },
     );
 
     vi.mocked(cliLib.normalizeAndAddDomain).mockImplementation(
       (domain, set, flag) => {
         set.add(domain);
-      }
+      },
     );
 
     vi.spyOn(console, "info").mockImplementation(() => {});
@@ -112,7 +112,7 @@ describe("CLI Module", () => {
       // Mock fs.readFileSync to simulate defaults file
       vi.mocked(fs.readFileSync).mockReturnValue(
         "- typescript:https://example.com/typescript/llms.txt\n" +
-          "- javascript:https://example.com/javascript/llms.txt"
+          "- javascript:https://example.com/javascript/llms.txt",
       );
 
       // Call the parseCliArgs function
@@ -410,7 +410,7 @@ describe("CLI Module", () => {
       // Mock defaults file
       vi.mocked(fs.readFileSync).mockReturnValue(
         "- typescript:https://example.com/typescript/llms.txt\n" +
-          "- javascript:https://example.com/javascript/llms.txt"
+          "- javascript:https://example.com/javascript/llms.txt",
       );
 
       const config = parseCliArgs();
@@ -503,7 +503,7 @@ describe("CLI Module", () => {
       const config = parseCliArgs();
       expect(config.openApiSpecs).toHaveProperty("petstore");
       expect(config.openApiSpecs.petstore).toBe(
-        "https://example.com/petstore.json"
+        "https://example.com/petstore.json",
       );
     });
 
@@ -651,7 +651,7 @@ describe("CLI Module", () => {
       vi.spyOn(cliLib, "parseNameValuePair").mockImplementation((input) => {
         if (input === "invalid-format") {
           console.error(
-            "Invalid format: 'invalid-format'. Expected 'name:value'. Skipping."
+            "Invalid format: 'invalid-format'. Expected 'name:value'. Skipping.",
           );
           return null;
         }
@@ -672,7 +672,7 @@ describe("CLI Module", () => {
 
       // Verify the error was logged with the correct format
       expect(consoleErrorSpy).toHaveBeenCalledWith(
-        "Invalid format: 'invalid-format'. Expected 'name:value'. Skipping."
+        "Invalid format: 'invalid-format'. Expected 'name:value'. Skipping.",
       );
 
       // Verify the result is not undefined since we're just testing error logging

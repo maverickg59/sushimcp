@@ -14,9 +14,9 @@ interface ResourceHandler {
 interface ProcessedResource {
   id: string;
   uri: string;
-  name: string;
+  title: string;
   description: string;
-  mimetype: string;
+  mimeType: string;
   handler: ResourceHandler;
 }
 
@@ -26,7 +26,7 @@ export const processDefaultsResources = (): ProcessedResource[] => {
   const defaults = JSON.parse(readFileSync(defaultsPath, "utf8"));
 
   return Object.entries(defaults).map(([key, value]) => {
-    const resourceName = key
+    const resourceTitle = key
       .split("_")
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" ")
@@ -34,19 +34,19 @@ export const processDefaultsResources = (): ProcessedResource[] => {
 
     const resourceDescription = key
       .split("_")
-      .map((word, index) => 
-        index === 0 
+      .map((word, index) =>
+        index === 0
           ? word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
-          : word.toLowerCase()
+          : word.toLowerCase(),
       )
       .join(" ")
       .concat(" llms.txt");
 
     return {
       id: key,
-      name: resourceName,
+      title: resourceTitle,
       description: resourceDescription,
-      mimetype: "text/plain",
+      mimeType: "text/plain",
       uri: value as string,
       handler: async (uri: URL) => {
         const response = await fetch(uri.href);
@@ -55,10 +55,8 @@ export const processDefaultsResources = (): ProcessedResource[] => {
           contents: [
             {
               uri: uri.href,
-              name: resourceName,
-              description: resourceDescription,
               text,
-              mimetype: "text/plain",
+              mimeType: "text/plain",
             },
           ],
         };

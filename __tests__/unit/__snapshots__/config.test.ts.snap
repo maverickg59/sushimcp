@@ -459,7 +459,7 @@ exports[`Configuration Files > should match package.json snapshot 1`] = `
     "test:watch": "vitest watch",
   },
   "type": "module",
-  "version": "0.0.15",
+  "version": "0.1.0",
 }
 `;
 

@@ -43,88 +43,72 @@ const server = new McpServer(
   {
     name: "sushimcp",
     version: VERSION,
-    displayName: "SushiMCP",
+    title: "SushiMCP",
     description:
       "SushiMCP a dev tools model context protocol server that serves context on a roll.",
-    publisher: "Chris White <chris@chriswhite.rocks> https://chriswhite.rocks",
   },
   {
     capabilities: {
       resources: {},
-      tools: {
-        list_llms_txt_sources: {
-          name: "list_llms_txt_sources",
-          description: "List the source urls where an llms.txt can be fetched.",
-          annotations: {
-            title: "List llms.txt sources",
-            readOnlyHint: true,
-            destructiveHint: false,
-            idempotentHint: true,
-            openWorldHint: false,
-          },
-        },
-        list_openapi_spec_sources: {
-          name: "list_openapi_spec_sources",
-          description:
-            "List the source urls where an OpenAPI spec can be fetched.",
-          annotations: {
-            title: "List OpenAPI spec sources",
-            readOnlyHint: true,
-            destructiveHint: false,
-            idempotentHint: true,
-            openWorldHint: false,
-          },
-        },
-        fetch_llms_txt: {
-          name: "fetch_llms_txt",
-          description: "Fetches the content of a llms.txt url.",
-          inputSchema: UrlFetchInputSchema,
-          annotations: {
-            title: "Fetch llms.txt content",
-            readOnlyHint: true,
-            destructiveHint: false,
-            idempotentHint: true,
-            openWorldHint: true,
-          },
-        },
-        fetch_openapi_spec: {
-          name: "fetch_openapi_spec",
-          description: "Fetches the content of a OpenAPI spec url.",
-          inputSchema: UrlFetchInputSchema,
-          annotations: {
-            title: "Fetch OpenAPI spec content",
-            readOnlyHint: true,
-            destructiveHint: false,
-            idempotentHint: true,
-            openWorldHint: true,
-          },
-        },
-      },
+      tools: {},
     },
-  }
+  },
 );
 
-server.tool(
+server.registerTool(
   "list_llms_txt_sources",
-  "This tool lists all available source urls where an llms.txt can be fetched. After reading the listed sources, use fetch_llms_txt to fetch any source that matches a technology in the instructions you received. Prefer llms.txt, but if llms.txt proves inadequate, check to see if other llms-full.txt or llms-mini.txt exist. When done, ask the user if they want to use other tools to search for documentation on any sources this tool could not find.",
-  (extra: RequestHandlerExtra<ServerRequest, ServerNotification>) =>
-    list_llms_txt_sources(extra, docSources)
-);
-
-server.tool(
-  "list_openapi_spec_sources",
-  "This tool lists all available source urls where an OpenAPI spec can be fetched.",
-  (extra: RequestHandlerExtra<ServerRequest, ServerNotification>) =>
-    list_openapi_spec_sources(extra, openApiSpecs)
-);
-
-server.tool(
-  "fetch_llms_txt",
-  "Fetches the content of one or more llms.txt URLs. Some llms.txt files compile a list of urls to other llms.txt file locations because listing their full documentation would bloat context. If the documentation you're looking for does not exist in the llms.txt, look for reference links to other llms.txt files and follow those.",
   {
-    input: UrlFetchInputSchema.describe(
-      "URL string, URL object, or array of URL/objects to fetch llms.txt from"
-    ),
+    title: "List llms.txt sources",
+    description:
+      "This tool lists all available source urls where an llms.txt can be fetched. After reading the listed sources, use fetch_llms_txt to fetch any source that matches a technology in the instructions you received. Prefer llms.txt, but if llms.txt proves inadequate, check to see if other llms-full.txt or llms-mini.txt exist. When done, ask the user if they want to use other tools to search for documentation on any sources this tool could not find.",
+    annotations: {
+      title: "List llms.txt sources",
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+  },
+  (extra: RequestHandlerExtra<ServerRequest, ServerNotification>) =>
+    list_llms_txt_sources(extra, docSources),
+);
+
+server.registerTool(
+  "list_openapi_spec_sources",
+  {
+    title: "List OpenAPI spec sources",
+    description:
+      "This tool lists all available source urls where an OpenAPI spec can be fetched.",
+    annotations: {
+      title: "List OpenAPI spec sources",
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+  },
+  (extra: RequestHandlerExtra<ServerRequest, ServerNotification>) =>
+    list_openapi_spec_sources(extra, openApiSpecs),
+);
+
+server.registerTool(
+  "fetch_llms_txt",
+  {
+    title: "Fetch llms.txt content",
+    description:
+      "Fetches the content of one or more llms.txt URLs. Some llms.txt files compile a list of urls to other llms.txt file locations because listing their full documentation would bloat context. If the documentation you're looking for does not exist in the llms.txt, look for reference links to other llms.txt files and follow those.",
+    inputSchema: {
+      input: UrlFetchInputSchema.describe(
+        "URL string, URL object, or array of URL/objects to fetch llms.txt from",
+      ),
+    },
+    annotations: {
+      title: "Fetch llms.txt content",
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
   },
   async (params, extra) => {
     const input = params?.input ?? params;
@@ -134,18 +118,28 @@ server.tool(
     return fetch_llms_txt(
       input,
       extra as RequestHandlerExtra<ServerRequest, ServerNotification>,
-      allowedDomains
+      allowedDomains,
     );
-  }
+  },
 );
 
-server.tool(
+server.registerTool(
   "fetch_openapi_spec",
-  "Fetches the content of one or more OpenAPI spec URLs.",
   {
-    input: UrlFetchInputSchema.describe(
-      "URL string, URL object, or array of URL/objects to fetch OpenAPI specs from"
-    ),
+    title: "Fetch OpenAPI spec content",
+    description: "Fetches the content of one or more OpenAPI spec URLs.",
+    inputSchema: {
+      input: UrlFetchInputSchema.describe(
+        "URL string, URL object, or array of URL/objects to fetch OpenAPI specs from",
+      ),
+    },
+    annotations: {
+      title: "Fetch OpenAPI spec content",
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
   },
   async (params, extra) => {
     const input = params?.input ?? params;
@@ -155,23 +149,23 @@ server.tool(
     return fetch_openapi_spec(
       input,
       extra as RequestHandlerExtra<ServerRequest, ServerNotification>,
-      allowedDomains
+      allowedDomains,
     );
-  }
+  },
 );
 
 // Process and register default resources
 const resources = processDefaultsResources();
-resources.forEach(({ id, uri, name, description, mimetype, handler }) => {
+resources.forEach(({ id, uri, title, description, mimeType, handler }) => {
   server.resource(
     id,
     uri,
     {
-      name,
+      title,
       description,
-      mimetype,
+      mimeType,
     },
-    handler
+    handler,
   );
 });
 
