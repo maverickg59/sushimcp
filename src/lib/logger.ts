@@ -27,10 +27,10 @@ const Colors = {
 function formatMessage(level: LogLevel, message: string): string {
   const timestamp = new Date().toISOString();
   const timestampStr = `${Colors.Gray}${timestamp}${Colors.Reset}`;
-  
+
   let levelStr: string;
   let color: string;
-  
+
   switch (level) {
     case LogLevel.ERROR:
       color = Colors.Red;
@@ -52,7 +52,7 @@ function formatMessage(level: LogLevel, message: string): string {
       color = Colors.White;
       levelStr = String(level).padEnd(5);
   }
-  
+
   return `${timestampStr} ${levelStr} ${color}${message}${Colors.Reset}\n`;
 }
 
@@ -65,7 +65,7 @@ function log(level: LogLevel, ...args: any[]) {
     .map((arg) => {
       if (arg instanceof Error) {
         return `${arg.message}${arg.stack ? `\n${arg.stack}` : ""}`;
-      } else if (typeof arg === 'object' && arg !== null) {
+      } else if (typeof arg === "object" && arg !== null) {
         try {
           return JSON.stringify(arg, null, 2);
         } catch (e) {
@@ -74,10 +74,10 @@ function log(level: LogLevel, ...args: any[]) {
       }
       return String(arg);
     })
-    .join(' ');
+    .join(" ");
 
   const formattedMessage = formatMessage(level, message);
-  
+
   // Always write to stderr with colors
   process.stderr.write(formattedMessage);
 }
@@ -91,8 +91,9 @@ export const logger = {
 };
 
 // Log unhandled promise rejections
-process.on('unhandledRejection', (reason) => {
-  logger.error('Unhandled Promise Rejection:', reason);});
+process.on("unhandledRejection", (reason) => {
+  logger.error("Unhandled Promise Rejection:", reason);
+});
 
-// Copyright (C) 2025 Christopher White
+// Copyright (C) 2026 Christopher White
 // SPDX-License-Identifier: AGPL-3.0-or-later

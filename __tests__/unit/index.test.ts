@@ -51,5 +51,5 @@ describe("Entry Point File", () => {
   });
 });
 
-// Copyright (C) 2025 Christopher White
+// Copyright (C) 2026 Christopher White
 // SPDX-License-Identifier: AGPL-3.0-or-later

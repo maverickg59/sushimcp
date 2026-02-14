@@ -91,7 +91,7 @@ describe("CLI Internal Functions", () => {
         singleOptions,
         "--llms-txt-source",
         undefined,
-        "--llms-txt-sources"
+        "--llms-txt-sources",
       );
 
       expect(result).toEqual({
@@ -109,7 +109,7 @@ describe("CLI Internal Functions", () => {
         singleOptions,
         "--llms-txt-source",
         undefined,
-        "--llms-txt-sources-file"
+        "--llms-txt-sources-file",
       );
 
       expect(result).toEqual({});
@@ -131,7 +131,7 @@ describe("CLI Internal Functions", () => {
         undefined,
         undefined,
         docSources,
-        openApiSpecs
+        openApiSpecs,
       );
 
       expect(result).toEqual(new Set(["example.com", "test.org"]));
@@ -150,7 +150,7 @@ describe("CLI Internal Functions", () => {
         undefined,
         undefined,
         docSources,
-        openApiSpecs
+        openApiSpecs,
       );
 
       expect(result).toEqual(new Set(["*"]));
@@ -183,5 +183,5 @@ describe("CLI Internal Functions", () => {
   });
 });
 
-// Copyright (C) 2025 Christopher White
+// Copyright (C) 2026 Christopher White
 // SPDX-License-Identifier: AGPL-3.0-or-later

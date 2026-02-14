@@ -1,4 +1,4 @@
-Copyright (C) 2025 Christopher White
+Copyright (C) 2026 Christopher White
 
 GNU AFFERO GENERAL PUBLIC LICENSE
 Version 3, 19 November 2007

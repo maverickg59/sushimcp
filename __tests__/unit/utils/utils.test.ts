@@ -13,7 +13,7 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import * as url from "url";
 import * as nodeFs from "fs";
-import { mockPathResolution, mockFileSystem } from "../../test-utils";
+import { mockPathResolution, mockFileSystem } from "../../test-utils.js";
 
 Object.defineProperty(import.meta, "url", {
   value: "file:///fake/path/src/lib/utils.ts",
@@ -69,7 +69,7 @@ describe("extractDomain", () => {
 
   it("should extract domain from valid HTTPS URL", () => {
     expect(extractDomain("https://sub.example.com/path")).toBe(
-      "sub.example.com"
+      "sub.example.com",
     );
   });
 
@@ -126,7 +126,7 @@ describe("checkDomainAccess", () => {
     const allowedDomains = new Set(["other-domain.com"]);
 
     expect(() => checkDomainAccess(targetInfo, allowedDomains)).toThrow(
-      "Access denied: Fetching from domain 'example.com' is not allowed"
+      "Access denied: Fetching from domain 'example.com' is not allowed",
     );
   });
 
@@ -150,7 +150,7 @@ describe("checkDomainAccess", () => {
     const allowedDomains = new Set([]);
 
     expect(() => checkDomainAccess(targetInfo, allowedDomains)).toThrow(
-      "Internal error: Unsupported target type"
+      "Internal error: Unsupported target type",
     );
   });
 
@@ -165,7 +165,7 @@ describe("checkDomainAccess", () => {
     checkDomainAccess(targetInfo, allowedDomains);
     // Verify the log message contains the expected content
     expect(loggerInfoSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Domain 'example.com' is allowed.")
+      expect.stringContaining("Domain 'example.com' is allowed."),
     );
   });
 });
@@ -206,7 +206,7 @@ describe("parseFetchTarget", () => {
     };
     expect(unsupportedResult.originalInput).toBe(fileUrl);
     expect(unsupportedResult.reason).toContain(
-      "Failed to convert file: URL to path"
+      "Failed to convert file: URL to path",
     );
   });
 
@@ -284,7 +284,7 @@ describe("fetchContent", () => {
     await fetchContent(targetInfo);
     // Verify the log message contains the expected fetch URL
     expect(loggerInfoSpy).toHaveBeenCalledWith(
-      expect.stringContaining("Fetching remote URL: https://example.com/")
+      expect.stringContaining("Fetching remote URL: https://example.com/"),
     );
   });
 
@@ -334,8 +334,8 @@ describe("fetchContent", () => {
     // Verify the log message contains the expected file path
     expect(loggerInfoSpy).toHaveBeenCalledWith(
       expect.stringContaining(
-        "Reading local file path from file: URL: /local/file/path"
-      )
+        "Reading local file path from file: URL: /local/file/path",
+      ),
     );
   });
 
@@ -359,7 +359,7 @@ describe("fetchContent", () => {
     };
 
     await expect(fetchContent(targetInfo)).rejects.toThrow(
-      "Cannot fetch content for unsupported target type: Test reason"
+      "Cannot fetch content for unsupported target type: Test reason",
     );
   });
 
@@ -371,7 +371,7 @@ describe("fetchContent", () => {
     } as unknown as TargetInfo;
 
     await expect(fetchContent(targetInfo)).rejects.toThrow(
-      "Internal error: Unhandled target info type"
+      "Internal error: Unhandled target info type",
     );
   });
 });
@@ -391,5 +391,5 @@ describe("getVersion", () => {
   });
 });
 
-// Copyright (C) 2025 Christopher White
+// Copyright (C) 2026 Christopher White
 // SPDX-License-Identifier: AGPL-3.0-or-later

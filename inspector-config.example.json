@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "sushimcp": {
+      "command": "node",
+      "args": [
+        "dist/index.js",
+        "--llms-txt-source",
+        "hono:https://hono.dev/llms-full.txt"
+      ],
+      "env": {
+        "GITHUB_PROXY_URL": "http://localhost:4111",
+        "GITHUB_PROXY_KEY": "proxy-key",
+        "GITHUB_OWNER": "owner-username",
+        "GITHUB_ORG": "org-name",
+        "GITHUB_MERGE_METHOD": "merge"
+      }
+    }
+  }
+}

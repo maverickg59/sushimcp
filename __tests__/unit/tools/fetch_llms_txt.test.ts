@@ -7,7 +7,7 @@ import type {
   ServerRequest,
   ServerNotification,
 } from "@modelcontextprotocol/sdk/types.js";
-import { resetAllMocks } from "../../test-utils";
+import { resetAllMocks } from "../../test-utils.js";
 
 vi.mock("#lib/utils", async () => {
   const actual = await vi.importActual("#lib/utils");

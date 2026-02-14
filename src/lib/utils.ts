@@ -22,7 +22,7 @@ export function extractDomain(urlString: string): string | null {
     const errorMessage =
       error instanceof Error ? error.message : "Unknown error";
     logger.error(
-      `Invalid URL format: ${errorMessage}. Only http, https, and file protocols are supported.`
+      `Invalid URL format: ${errorMessage}. Only http, https, and file protocols are supported.`,
     );
   }
   return null;
@@ -30,15 +30,15 @@ export function extractDomain(urlString: string): string | null {
 
 export function checkDomainAccess(
   targetInfo: TargetInfo,
-  allowedDomains: Set<string>
+  allowedDomains: Set<string>,
 ): void {
   if (targetInfo.type === "remote") {
     if (!allowedDomains.has("*") && !allowedDomains.has(targetInfo.hostname)) {
       logger.error(
-        `Domain '${targetInfo.hostname}' is not in the allowed domains list.`
+        `Domain '${targetInfo.hostname}' is not in the allowed domains list.`,
       );
       throw new Error(
-        `Access denied: Fetching from domain '${targetInfo.hostname}' is not allowed by server configuration. Ask user to add domain to allow list.`
+        `Access denied: Fetching from domain '${targetInfo.hostname}' is not allowed by server configuration. Ask user to add domain to allow list.`,
       );
     }
     logger.info(`Domain '${targetInfo.hostname}' is allowed.`);
@@ -49,13 +49,13 @@ export function checkDomainAccess(
     logger.warn("Local file access permitted.");
   } else {
     throw new Error(
-      `Internal error: Unsupported target type '${targetInfo.type}' during access check.`
+      `Internal error: Unsupported target type '${targetInfo.type}' during access check.`,
     );
   }
 }
 
 export async function parseFetchTarget(
-  targetUrlString: string
+  targetUrlString: string,
 ): Promise<TargetInfo> {
   try {
     const targetUrl = new URL(targetUrlString);
@@ -94,7 +94,7 @@ export async function parseFetchTarget(
         await fs.stat(resolvedPath);
       } catch (statError) {
         throw new Error(
-          `Path does not exist or is inaccessible: ${resolvedPath}`
+          `Path does not exist or is inaccessible: ${resolvedPath}`,
         );
       }
       return {
@@ -124,24 +124,24 @@ export async function fetchContent(targetInfo: TargetInfo): Promise<string> {
     }
     case "localFileUrl":
       logger.info(
-        `Reading local file path from file: URL: ${targetInfo.filePath}`
+        `Reading local file path from file: URL: ${targetInfo.filePath}`,
       );
       return await fs.readFile(targetInfo.filePath, "utf-8");
     case "localPath":
       logger.info(
-        `Reading local file path directly: ${targetInfo.resolvedPath}`
+        `Reading local file path directly: ${targetInfo.resolvedPath}`,
       );
       return await fs.readFile(targetInfo.resolvedPath, "utf-8");
     case "unsupported":
       throw new Error(
-        `Cannot fetch content for unsupported target type: ${targetInfo.reason}`
+        `Cannot fetch content for unsupported target type: ${targetInfo.reason}`,
       );
     default: {
       const exhaustiveCheck: never = targetInfo;
       throw new Error(
         `Internal error: Unhandled target info type: ${JSON.stringify(
-          exhaustiveCheck
-        )}`
+          exhaustiveCheck,
+        )}`,
       );
     }
   }
@@ -150,11 +150,11 @@ export async function fetchContent(targetInfo: TargetInfo): Promise<string> {
 export type UrlInput = { url: string } | string;
 
 export const normalizeUrlInput = (
-  input: UrlInput | UrlInput[]
+  input: UrlInput | UrlInput[],
 ): { url: string }[] => {
   if (Array.isArray(input)) {
     return input.map((item) =>
-      typeof item === "string" ? { url: item } : item
+      typeof item === "string" ? { url: item } : item,
     );
   }
   return [typeof input === "string" ? { url: input } : input];
@@ -174,5 +174,5 @@ export function getVersion(): string {
   return "unknown";
 }
 
-// Copyright (C) 2025 Christopher White
+// Copyright (C) 2026 Christopher White
 // SPDX-License-Identifier: AGPL-3.0-or-later

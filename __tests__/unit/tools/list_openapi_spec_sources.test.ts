@@ -26,11 +26,11 @@ describe("list_openapi_spec_sources", () => {
     const content = result.content[0].text;
     expect(content).toContain("Available OpenAPI specifications:");
     expect(content).toContain(
-      "local_api: http://localhost:8787/api/v1/openapi.json"
+      "local_api: http://localhost:8787/api/v1/openapi.json",
     );
     expect(content).toContain("prod_api: https://api.example.com/openapi.json");
     expect(content).toContain(
-      "dev_api: https://dev.example.com/api/swagger.yaml"
+      "dev_api: https://dev.example.com/api/swagger.yaml",
     );
   });
 
@@ -44,7 +44,7 @@ describe("list_openapi_spec_sources", () => {
     expect(Array.isArray(result.content)).toBe(true);
     expect(result.content[0]).toHaveProperty("type", "text");
     expect(result.content[0].text).toBe(
-      "No OpenAPI specifications configured."
+      "No OpenAPI specifications configured.",
     );
   });
 
@@ -65,10 +65,10 @@ describe("list_openapi_spec_sources", () => {
     expect(content).toContain("api-v1: http://localhost:3000/v1/openapi.json");
     expect(content).toContain("api@v2: http://localhost:3000/v2/openapi.yaml");
     expect(content).toContain(
-      "external_api: https://external.example.com/swagger.json"
+      "external_api: https://external.example.com/swagger.json",
     );
   });
 });
 
-// Copyright (C) 2025 Christopher White
+// Copyright (C) 2026 Christopher White
 // SPDX-License-Identifier: AGPL-3.0-or-later

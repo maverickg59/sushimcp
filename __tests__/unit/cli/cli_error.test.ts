@@ -1,12 +1,12 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { 
-  loggerErrorSpy, 
-  loggerWarnSpy, 
+import {
+  loggerErrorSpy,
+  loggerWarnSpy,
   mockPathResolution,
-  resetAllMocks 
-} from "../../test-utils";
+  resetAllMocks,
+} from "../../test-utils.js";
 
 vi.mock("node:fs");
 vi.mock("node:path");
@@ -32,7 +32,7 @@ describe("CLI Error Handling", () => {
 
       expect(loggerErrorSpy).toHaveBeenCalled();
       expect(loggerErrorSpy.mock.calls[0][0]).toContain(
-        "Failed to load default sources: Test error reading file"
+        "Failed to load default sources: Test error reading file",
       );
       expect(result).toEqual({});
     });
@@ -78,11 +78,13 @@ describe("CLI Error Handling", () => {
 
       // Match the actual log message format which includes timestamp and log level
       expect(loggerWarnSpy).toHaveBeenCalledWith(
-        expect.stringContaining("No domains could be inferred from sources. Only local file access will be allowed.")
+        expect.stringContaining(
+          "No domains could be inferred from sources. Only local file access will be allowed.",
+        ),
       );
     });
   });
 });
 
-// Copyright (C) 2025 Christopher White
+// Copyright (C) 2026 Christopher White
 // SPDX-License-Identifier: AGPL-3.0-or-later

@@ -25,7 +25,7 @@ import { type UrlFetchInput } from "./tool_schemas.js";
 export const fetch_openapi_spec = async (
   input: UrlFetchInput,
   extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
-  allowedDomains: Set<string>
+  allowedDomains: Set<string>,
 ): Promise<CallToolResult> => {
   logger.debug("Processing fetch_openapi_spec request with input:", input);
 
@@ -62,7 +62,7 @@ export const fetch_openapi_spec = async (
       });
 
       logger.debug(
-        `Successfully fetched ${fileContent.length} bytes from ${url}`
+        `Successfully fetched ${fileContent.length} bytes from ${url}`,
       );
     } catch (error) {
       const errorMsg = `Failed to process OpenAPI spec request for ${url}: ${
@@ -79,5 +79,5 @@ export const fetch_openapi_spec = async (
   };
 };
 
-// Copyright (C) 2025 Christopher White
+// Copyright (C) 2026 Christopher White
 // SPDX-License-Identifier: AGPL-3.0-or-later

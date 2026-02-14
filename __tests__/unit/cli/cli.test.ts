@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { Command } from "commander";
 import * as utils from "#lib/utils";
 import * as cliLib from "#lib/cli_lib";
-import { consoleErrorSpy, mockPathResolution } from "../../test-utils";
+import { consoleErrorSpy, mockPathResolution } from "../../test-utils.js";
 
 // Mock dependencies but not the module itself
 vi.mock("node:fs");
@@ -685,5 +685,5 @@ describe("CLI Module", () => {
   });
 });
 
-// Copyright (C) 2025 Christopher White
+// Copyright (C) 2026 Christopher White
 // SPDX-License-Identifier: AGPL-3.0-or-later

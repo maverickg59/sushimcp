@@ -9,7 +9,7 @@ import { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.j
 // --- List llms.txt Sources Tool ---
 export const list_llms_txt_sources = async (
   extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
-  docSources: Record<string, string>
+  docSources: Record<string, string>,
 ): Promise<CallToolResult> => {
   if (Object.keys(docSources).length === 0) {
     return {
@@ -26,5 +26,5 @@ export const list_llms_txt_sources = async (
   return { content };
 };
 
-// Copyright (C) 2025 Christopher White
+// Copyright (C) 2026 Christopher White
 // SPDX-License-Identifier: AGPL-3.0-or-later

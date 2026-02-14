@@ -27,7 +27,7 @@ describe("list_llms_txt_sources", () => {
     const content = result.content[0].text;
     expect(content).toContain("Available llms.txt sources:");
     expect(content).toContain(
-      "typescript: https://example.com/typescript/llms.txt"
+      "typescript: https://example.com/typescript/llms.txt",
     );
     expect(content).toContain("react: https://example.com/react/llms.txt");
     expect(content).toContain("nodejs: https://example.com/nodejs/llms.txt");
@@ -63,10 +63,10 @@ describe("list_llms_txt_sources", () => {
     expect(content).toContain("next.js: https://example.com/next.js/llms.txt");
     expect(content).toContain("vue@3: https://example.com/vue/llms-v3.txt");
     expect(content).toContain(
-      "angular_12: https://example.com/angular/llms_12.txt"
+      "angular_12: https://example.com/angular/llms_12.txt",
     );
   });
 });
 
-// Copyright (C) 2025 Christopher White
+// Copyright (C) 2026 Christopher White
 // SPDX-License-Identifier: AGPL-3.0-or-later

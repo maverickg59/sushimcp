@@ -25,7 +25,7 @@ export interface CliConfig {
 // Source loading functions
 /** @internal */
 export function loadDefaultSources(
-  defaultsPath: string
+  defaultsPath: string,
 ): Record<string, string> {
   const defaultSources: Record<string, string> = {};
   try {
@@ -44,7 +44,7 @@ export function loadDefaultSources(
     }
   } catch (error) {
     logger.error(
-      `Failed to load default sources: ${error instanceof Error ? error.message : error}`
+      `Failed to load default sources: ${error instanceof Error ? error.message : error}`,
     );
   }
   return defaultSources;
@@ -57,7 +57,7 @@ export function processSourceOptions(
   singleOptions: string[] | undefined,
   singleFlagName: string,
   multipleOption: string | undefined,
-  multipleFlagName: string
+  multipleFlagName: string,
 ): Record<string, string> {
   // Process individual options
   if (singleOptions && singleOptions.length > 0) {
@@ -92,7 +92,7 @@ export function processDomainOptions(
   denyDomainOptions: string[] | undefined,
   denyDomainsOption: string | undefined,
   docSources: Record<string, string>,
-  openApiSpecs: Record<string, string>
+  openApiSpecs: Record<string, string>,
 ): Set<string> {
   const allowedDomains = new Set<string>();
   const deniedDomains = new Set<string>();
@@ -152,7 +152,7 @@ export function processDomainOptions(
 /** @internal */
 export function inferDomainsFromSources(
   sources: Record<string, string>,
-  allowedDomains: Set<string>
+  allowedDomains: Set<string>,
 ): void {
   Object.values(sources).forEach((url) => {
     try {
@@ -165,7 +165,7 @@ export function inferDomainsFromSources(
       logger.error(
         `Failed to parse source URL '${url}' for domain inference. Error: ${
           e instanceof Error ? e.message : String(e)
-        }. Skipping.`
+        }. Skipping.`,
       );
     }
   });
@@ -173,11 +173,11 @@ export function inferDomainsFromSources(
   // Warning messages
   if (allowedDomains.size === 0 && Object.keys(sources).length > 0) {
     logger.warn(
-      "Warning: No remote URLs configured or parsed, and no explicit domains allowed. Fetching might be restricted to local files only."
+      "Warning: No remote URLs configured or parsed, and no explicit domains allowed. Fetching might be restricted to local files only.",
     );
   } else if (allowedDomains.size === 0) {
     logger.warn(
-      "No domains could be inferred from sources. Only local file access will be allowed."
+      "No domains could be inferred from sources. Only local file access will be allowed.",
     );
   }
 }
@@ -186,7 +186,7 @@ export function inferDomainsFromSources(
 /** @internal */
 export function getDocSources(
   options: OptionValues,
-  includeDefaults: boolean
+  includeDefaults: boolean,
 ): Record<string, string> {
   let docSources: Record<string, string> = {};
   let deprecatedDocSources: Record<string, string> = {};
@@ -203,12 +203,12 @@ export function getDocSources(
     options.llmsTxtSource,
     "--llms-txt-source",
     options.llmsTxtSources,
-    "--llms-txt-sources"
+    "--llms-txt-sources",
   );
 
   if (options?.url?.length > 0 || options?.urls?.length > 0) {
     logger.warn(
-      "Warning: The --url and --urls options are deprecated. Use --llms-txt-source and --llms-txt-sources instead."
+      "Warning: The --url and --urls options are deprecated. Use --llms-txt-source and --llms-txt-sources instead.",
     );
   }
 
@@ -217,7 +217,7 @@ export function getDocSources(
     options.url,
     "--url",
     options.urls,
-    "--urls"
+    "--urls",
   );
 
   // Merge deprecated sources into docSources
@@ -225,7 +225,7 @@ export function getDocSources(
 
   if (Object.keys(docSources).length === 0) {
     logger.warn(
-      "No documentation sources provided. Use --source to add sources."
+      "No documentation sources provided. Use --source to add sources.",
     );
   }
 
@@ -241,12 +241,12 @@ export function getOpenApiSpecs(options: OptionValues): Record<string, string> {
     options.openapiSpecSource,
     "--openapi-spec-source",
     options.openapiSpecSources,
-    "--openapi-spec-sources"
+    "--openapi-spec-sources",
   );
 
   if (Object.keys(openApiSpecs).length === 0) {
     logger.warn(
-      "No OpenAPI specs provided. Use --openapi to add OpenAPI specs."
+      "No OpenAPI specs provided. Use --openapi to add OpenAPI specs.",
     );
   }
 
@@ -259,7 +259,7 @@ export function parseCliArgs(): CliConfig {
   program
     .name("SushiMCP")
     .description(
-      "Starts SushiMCP, a dev tools model context protocol server that serves context on a roll."
+      "Starts SushiMCP, a dev tools model context protocol server that serves context on a roll.",
     )
     .version(VERSION)
     .option(
@@ -267,56 +267,56 @@ export function parseCliArgs(): CliConfig {
       "--url <name:url>",
       "Specify a single documentation source (repeatable)",
       (value, previous: string[] = []) => previous.concat(value),
-      []
+      [],
     )
     .option(
       // DEPRECATED: Use --llms-txt-sources instead
       "--urls <string>",
-      "Specify a list of llms.txt sources as a single space-separated string (e.g., 'name1:url1 name2:url2')"
+      "Specify a list of llms.txt sources as a single space-separated string (e.g., 'name1:url1 name2:url2')",
     )
     .option(
       "--llms-txt-source <name:url>",
       "Specify a single documentation source (repeatable)",
       (value, previous: string[] = []) => previous.concat(value),
-      []
+      [],
     )
     .option(
       "--llms-txt-sources <string>",
-      "Specify a list of llms.txt sources as a single space-separated string (e.g., 'name1:url1 name2:url2')"
+      "Specify a list of llms.txt sources as a single space-separated string (e.g., 'name1:url1 name2:url2')",
     )
     .option(
       "--openapi-spec-source <name:url>",
       "Specify a single OpenAPI spec source (repeatable)",
       (value, previous: string[] = []) => previous.concat(value),
-      []
+      [],
     )
     .option(
       "--openapi-spec-sources <string>",
-      "Specify a list of OpenAPI spec sources as a single space-separated string (e.g., 'name1:url1 name2:url2')"
+      "Specify a list of OpenAPI spec sources as a single space-separated string (e.g., 'name1:url1 name2:url2')",
     )
     .option(
       "--no-defaults",
-      "Do NOT include default documentation sources from src/defaults.md"
+      "Do NOT include default documentation sources from src/defaults.md",
     )
     .option(
       "--allow-domain <domain>",
       "Allow fetching from a specific domain (repeatable, use '*' for all)",
       (value, previous: string[] = []) => previous.concat(value),
-      []
+      [],
     )
     .option(
       "--allow-domains <string>",
-      "Allow fetching from a list of domains as a single space-separated string (e.g., 'domain1 domain2')"
+      "Allow fetching from a list of domains as a single space-separated string (e.g., 'domain1 domain2')",
     )
     .option(
       "--deny-domain <domain>",
       "Deny fetching from a specific domain (repeatable, use '*' for all)",
       (value, previous: string[] = []) => previous.concat(value),
-      []
+      [],
     )
     .option(
       "--deny-domains <string>",
-      "Deny fetching from a list of domains as a single space-separated string (e.g., 'domain1 domain2')"
+      "Deny fetching from a list of domains as a single space-separated string (e.g., 'domain1 domain2')",
     );
 
   program.parse(process.argv);
@@ -331,7 +331,7 @@ export function parseCliArgs(): CliConfig {
     options.denyDomain,
     options.denyDomains,
     docSources,
-    openApiSpecs
+    openApiSpecs,
   );
 
   // Create the final config
@@ -343,5 +343,5 @@ export function parseCliArgs(): CliConfig {
   return config;
 }
 
-// Copyright (C) 2025 Christopher White
+// Copyright (C) 2026 Christopher White
 // SPDX-License-Identifier: AGPL-3.0-or-later

@@ -9,7 +9,7 @@ import { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.j
 // --- List OpenAPI Specs Tool ---
 export const list_openapi_spec_sources = async (
   extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
-  apiSpecSources: Record<string, string>
+  apiSpecSources: Record<string, string>,
 ): Promise<CallToolResult> => {
   if (Object.keys(apiSpecSources).length === 0) {
     return {
@@ -28,5 +28,5 @@ export const list_openapi_spec_sources = async (
   return { content };
 };
 
-// Copyright (C) 2025 Christopher White
+// Copyright (C) 2026 Christopher White
 // SPDX-License-Identifier: AGPL-3.0-or-later

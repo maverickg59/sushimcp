@@ -12,7 +12,13 @@ import {
   fetch_llms_txt,
   fetch_openapi_spec,
   list_openapi_spec_sources,
+  github_projects,
+  github_pull_requests,
+  github_issues,
   UrlFetchInputSchema,
+  GitHubProjectsInputSchema,
+  GitHubPullRequestsInputSchema,
+  GitHubIssuesInputSchema,
 } from "#tools/index.js";
 import { parseCliArgs, getVersion, logger } from "#lib/index.js";
 import { processDefaultsResources } from "#resources/index.js";
@@ -154,6 +160,75 @@ server.registerTool(
   },
 );
 
+server.registerTool(
+  "github_projects",
+  {
+    title: "Manage GitHub Project items",
+    description:
+      "Manages GitHub Project items for planning and tracking work. Supports listing, getting, creating, updating, and deleting project items within a GitHub ProjectV2 board. Use this to create and manage tasks, update statuses, and track progress.",
+    inputSchema: GitHubProjectsInputSchema,
+    annotations: {
+      title: "Manage GitHub Project items",
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: true,
+    },
+  },
+  async (params) => {
+    if (!params) {
+      throw new Error("No input provided to github_projects");
+    }
+    return github_projects(params);
+  },
+);
+
+server.registerTool(
+  "github_pull_requests",
+  {
+    title: "Manage GitHub Pull Requests",
+    description:
+      "Manages GitHub Pull Requests for authoring, reviewing, and iterating on code changes. Supports creating PRs, listing open PRs, reading PR details, reading and posting comments (general and inline), requesting reviewers, merging, and closing PRs.",
+    inputSchema: GitHubPullRequestsInputSchema,
+    annotations: {
+      title: "Manage GitHub Pull Requests",
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: true,
+    },
+  },
+  async (params) => {
+    if (!params) {
+      throw new Error("No input provided to github_pull_requests");
+    }
+    return github_pull_requests(params);
+  },
+);
+
+server.registerTool(
+  "github_issues",
+  {
+    title: "Manage GitHub Issues",
+    description:
+      "Manages GitHub Issues for tracking bugs, features, and tasks. Supports listing issues with filters, getting issue details, creating new issues, updating existing issues, closing issues, and adding issues to GitHub Projects.",
+    inputSchema: GitHubIssuesInputSchema,
+    annotations: {
+      title: "Manage GitHub Issues",
+      readOnlyHint: false,
+      destructiveHint: false,
+      idempotentHint: false,
+      openWorldHint: true,
+    },
+  },
+  async (params) => {
+    if (!params) {
+      throw new Error("No input provided to github_issues");
+    }
+    return github_issues(params);
+  },
+);
+
 // Process and register default resources
 const resources = processDefaultsResources();
 resources.forEach(({ id, uri, title, description, mimeType, handler }) => {
@@ -190,5 +265,5 @@ try {
   process.exit(1);
 }
 
-// Copyright (C) 2025 Christopher White
+// Copyright (C) 2026 Christopher White
 // SPDX-License-Identifier: AGPL-3.0-or-later

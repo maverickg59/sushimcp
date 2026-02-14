@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import * as utils from "#lib/utils";
-import { logger } from "../../../src/lib/logger";
+import { logger } from "../../../src/lib/logger.js";
 import {
   parseNameValuePair,
   addParsedSourceToTarget,
@@ -10,7 +10,7 @@ import {
   processMultipleItems,
 } from "#lib/cli_lib";
 import type { CliConfig } from "#lib/cli";
-import { loggerErrorSpy, loggerInfoSpy, resetAllMocks } from "../../test-utils";
+import { loggerErrorSpy, loggerInfoSpy, resetAllMocks } from "../../test-utils.js";
 
 describe("CLI Library Utilities", () => {
   const originalEnv = process.env;
@@ -27,7 +27,7 @@ describe("CLI Library Utilities", () => {
   describe("parseNameValuePair", () => {
     it("should correctly parse a valid name-value pair", () => {
       const result = parseNameValuePair(
-        "typescript:https://example.com/typescript/llms.txt"
+        "typescript:https://example.com/typescript/llms.txt",
       );
 
       expect(result).not.toBeNull();
@@ -37,7 +37,7 @@ describe("CLI Library Utilities", () => {
 
     it("should handle values containing additional delimiters", () => {
       const result = parseNameValuePair(
-        "node:https://nodejs.org:443/docs/llms.txt"
+        "node:https://nodejs.org:443/docs/llms.txt",
       );
 
       expect(result).not.toBeNull();
@@ -151,7 +151,7 @@ describe("CLI Library Utilities", () => {
           input.includes("docs.example.com")
         ) {
           // For URLs with protocols, paths, or query params, extract just the domain
-          if (input.startsWith('http')) {
+          if (input.startsWith("http")) {
             try {
               const url = new URL(input);
               return url.hostname;
@@ -183,7 +183,7 @@ describe("CLI Library Utilities", () => {
       normalizeAndAddDomain(
         "http://api.example.org",
         domains,
-        "--allow-domain"
+        "--allow-domain",
       );
 
       expect(domains.has("api.example.org")).toBe(true);
@@ -195,7 +195,7 @@ describe("CLI Library Utilities", () => {
       normalizeAndAddDomain(
         "https://docs.example.com/path?query=value",
         domains,
-        "--allow-domain"
+        "--allow-domain",
       );
 
       expect(domains.has("docs.example.com")).toBe(true);
@@ -222,18 +222,20 @@ describe("CLI Library Utilities", () => {
 
       // Mock warning log for empty domain entry
       const warnSpy = vi.spyOn(logger, "warn");
-      
+
       // Make sure extractDomain returns null for empty string
       vi.spyOn(utils, "extractDomain").mockImplementationOnce(() => {
         logger.warn("Skipping empty --allow-domain entry.");
         return null;
       });
-      
+
       normalizeAndAddDomain("", domains, "--allow-domain");
 
       expect(domains.size).toBe(0);
       expect(warnSpy).toHaveBeenCalled();
-      expect(warnSpy.mock.calls[0][0]).toContain("Skipping empty --allow-domain entry.");
+      expect(warnSpy.mock.calls[0][0]).toContain(
+        "Skipping empty --allow-domain entry.",
+      );
     });
   });
 
@@ -261,28 +263,28 @@ describe("CLI Library Utilities", () => {
         calls.some(
           (call) =>
             typeof call === "string" &&
-            call.includes("SushiMCP Configuration Summary")
-        )
+            call.includes("SushiMCP Configuration Summary"),
+        ),
       ).toBe(true);
 
       expect(
         calls.some(
           (call) =>
-            typeof call === "string" && call.includes("Documentation Sources:")
-        )
+            typeof call === "string" && call.includes("Documentation Sources:"),
+        ),
       ).toBe(true);
 
       expect(
         calls.some(
-          (call) => typeof call === "string" && call.includes("OpenAPI Specs:")
-        )
+          (call) => typeof call === "string" && call.includes("OpenAPI Specs:"),
+        ),
       ).toBe(true);
 
       expect(
         calls.some(
           (call) =>
-            typeof call === "string" && call.includes("Allowed Fetch Domains:")
-        )
+            typeof call === "string" && call.includes("Allowed Fetch Domains:"),
+        ),
       ).toBe(true);
     });
   });
@@ -362,5 +364,5 @@ describe("CLI Library Utilities", () => {
   });
 });
 
-// Copyright (C) 2025 Christopher White
+// Copyright (C) 2026 Christopher White
 // SPDX-License-Identifier: AGPL-3.0-or-later

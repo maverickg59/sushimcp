@@ -1,6 +1,15 @@
-import { describe, it, expect, vi, beforeEach, afterEach, beforeAll, afterAll } from "vitest";
+import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach,
+  beforeAll,
+  afterAll,
+} from "vitest";
 import { logger } from "#lib/logger";
-import { EventEmitter } from 'events'; // For testing unhandledRejection
+import { EventEmitter } from "events"; // For testing unhandledRejection
 
 describe("Logger", () => {
   // Store original process properties and mocks
@@ -13,9 +22,9 @@ describe("Logger", () => {
     // Mock stderr.write to capture log output
     process.stderr.write = writeStub;
     writeStub.mockClear();
-    
+
     // Spy on process.emit for unhandledRejection test
-    processEmitSpy = vi.spyOn(process, 'emit');
+    processEmitSpy = vi.spyOn(process, "emit");
   });
 
   afterEach(() => {
@@ -143,7 +152,7 @@ describe("Logger", () => {
     const error = new Error("Test error");
     error.stack = "Error: Test error\n    at test.js:1:1";
     logger.error(error);
-    
+
     expect(writeStub).toHaveBeenCalledTimes(1);
     const logOutput = writeStub.mock.calls[0][0] as string;
     expect(logOutput).toContain("Test error");
@@ -155,20 +164,20 @@ describe("Logger", () => {
     // Instead, directly test the event handler function
 
     // Find the unhandledRejection listener
-    const listeners = process.listeners('unhandledRejection');
+    const listeners = process.listeners("unhandledRejection");
     if (listeners.length === 0) {
       // No listener found, test should be skipped
-      console.warn('No unhandledRejection listener found, test skipped');
+      console.warn("No unhandledRejection listener found, test skipped");
       return;
     }
-    
+
     // Get the last registered handler - should be our logger's handler
     const rejectionHandler = listeners[listeners.length - 1];
-    
+
     // Directly invoke the handler with our test error
     const testError = new Error("Test unhandled rejection");
     rejectionHandler(testError, Promise.resolve()); // Use a resolved promise to avoid actual rejections
-    
+
     // Verify the error was logged as expected
     expect(writeStub).toHaveBeenCalledTimes(1);
     const logOutput = writeStub.mock.calls[0][0] as string;
@@ -182,21 +191,21 @@ describe("Logger", () => {
     logger.warn("warn message");
     logger.error("error message");
     logger.debug("debug message");
-    
+
     expect(writeStub).toHaveBeenCalledTimes(4);
-    
+
     // Check that each log level has the correct color code
     const infoLog = writeStub.mock.calls[0][0] as string;
     const warnLog = writeStub.mock.calls[1][0] as string;
     const errorLog = writeStub.mock.calls[2][0] as string;
     const debugLog = writeStub.mock.calls[3][0] as string;
-    
+
     expect(infoLog).toContain("\x1b[36m"); // Cyan for INFO
-    expect(warnLog).toContain("\x1b[33m");  // Yellow for WARN
+    expect(warnLog).toContain("\x1b[33m"); // Yellow for WARN
     expect(errorLog).toContain("\x1b[31m"); // Red for ERROR
     expect(debugLog).toContain("\x1b[90m"); // Gray for DEBUG
   });
 });
 
-// Copyright (C) 2025 Christopher White
+// Copyright (C) 2026 Christopher White
 // SPDX-License-Identifier: AGPL-3.0-or-later

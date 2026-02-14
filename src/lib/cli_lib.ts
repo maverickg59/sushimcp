@@ -15,12 +15,12 @@ export interface ParsedNameUrl {
  */
 export function parseNameValuePair(
   input: string,
-  delimiter = ":"
+  delimiter = ":",
 ): ParsedNameUrl | null {
   const parts = input.split(delimiter);
   if (parts.length < 2) {
     logger.error(
-      `Invalid format: '${input}'. Expected 'name${delimiter}value'. Skipping.`
+      `Invalid format: '${input}'. Expected 'name${delimiter}value'. Skipping.`,
     );
     return null;
   }
@@ -30,7 +30,7 @@ export function parseNameValuePair(
 
   if (!name || !urlValue) {
     logger.error(
-      `Invalid format: '${input}'. Name or value part is empty. Skipping.`
+      `Invalid format: '${input}'. Name or value part is empty. Skipping.`,
     );
     return null;
   }
@@ -45,7 +45,7 @@ export function validateAndAddSource(
   target: Record<string, string>,
   name: string,
   urlValue: string,
-  sourceOrigin: string
+  sourceOrigin: string,
 ): void {
   try {
     new URL(urlValue);
@@ -59,7 +59,7 @@ export function validateAndAddSource(
       logger.error(
         `(${sourceOrigin}) Invalid URL or Path format for '${name}': '${urlValue}'. Skipping. Error: ${
           e instanceof Error ? e.message : e
-        }`
+        }`,
       );
     }
   }
@@ -71,7 +71,7 @@ export function validateAndAddSource(
 export function processSpaceSeparatedItems<T>(
   input: string | undefined,
   processor: (item: string) => T | null,
-  errorPrefix: string
+  errorPrefix: string,
 ): T[] {
   const results: T[] = [];
 
@@ -96,7 +96,7 @@ export function processSpaceSeparatedItems<T>(
 export function processMultipleItems<T>(
   items: string[] | undefined,
   processor: (item: string) => T | null,
-  errorPrefix: string
+  errorPrefix: string,
 ): T[] {
   const results: T[] = [];
 
@@ -118,7 +118,7 @@ export function processMultipleItems<T>(
 export function addParsedSourceToTarget(
   source: ParsedNameUrl,
   target: Record<string, string>,
-  origin: string
+  origin: string,
 ): void {
   validateAndAddSource(target, source.name, source.urlValue, origin);
 }
@@ -129,7 +129,7 @@ export function addParsedSourceToTarget(
 export function normalizeAndAddDomain(
   domain: string,
   target: Set<string>,
-  origin: string
+  origin: string,
 ): void {
   const extractedDomain = extractDomain(domain.trim());
   if (extractedDomain) {
@@ -144,18 +144,16 @@ export function normalizeAndAddDomain(
 export function logConfigSummary(config: CliConfig): void {
   logger.info("\n--- SushiMCP Configuration Summary ---");
   logger.info(
-    `Documentation Sources: ${JSON.stringify(config.docSources, null, 2)}`
+    `Documentation Sources: ${JSON.stringify(config.docSources, null, 2)}`,
   );
-  logger.info(
-    `OpenAPI Specs: ${JSON.stringify(config.openApiSpecs, null, 2)}`
-  );
+  logger.info(`OpenAPI Specs: ${JSON.stringify(config.openApiSpecs, null, 2)}`);
   logger.info(
     `Allowed Fetch Domains: ${
       [...config.allowedDomains].join(", ") || "(None - local only?)"
-    }`
+    }`,
   );
   logger.info("------------------------------------\n");
 }
 
-// Copyright (C) 2025 Christopher White
+// Copyright (C) 2026 Christopher White
 // SPDX-License-Identifier: AGPL-3.0-or-later

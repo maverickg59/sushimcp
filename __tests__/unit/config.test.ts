@@ -89,11 +89,11 @@ describe("Husky Configuration", () => {
   it("should match husky files content", () => {
     const preCommitContent = fs.readFileSync(
       path.join(huskyDir, "pre-commit"),
-      "utf-8"
+      "utf-8",
     );
     expect(preCommitContent).toMatchSnapshot();
   });
 });
 
-// Copyright (C) 2025 Christopher White
+// Copyright (C) 2026 Christopher White
 // SPDX-License-Identifier: AGPL-3.0-or-later

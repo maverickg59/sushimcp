@@ -109,6 +109,7 @@ web_modules/
 .env.test.local
 .env.production.local
 .env.local
+!.env.example
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
@@ -180,11 +181,12 @@ public/build/
 .pnp.*
 
 # SushiMCP specific
-.DS_Store"
+.DS_Store
+inspector-config.json"
 `;
 
 exports[`Configuration Files > should match license.txt snapshot 1`] = `
-"Copyright (C) 2025 Christopher White
+"Copyright (C) 2026 Christopher White
 
 GNU AFFERO GENERAL PUBLIC LICENSE
 Version 3, 19 November 2007
@@ -446,10 +448,11 @@ exports[`Configuration Files > should match package.json snapshot 1`] = `
     "url": "git+https://github.com/maverickg59/sushimcp.git",
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --minify && cp -r static/ dist/static",
+    "build": "tsup src/index.ts --format esm --dts --minify --tsconfig tsconfig.build.json && cp -r static/ dist/static",
     "clear:npx:cache": "npx clear-npx-cache",
-    "dev": "tsup src/index.ts --format esm --watch",
-    "dev:inspect": "npm run build && npx -y @modelcontextprotocol/inspector --config inspector.json --server sushimcp",
+    "dev": "tsup src/index.ts --format esm --tsconfig tsconfig.build.json --watch",
+    "dev:inspect": "npm run build && npx -y @modelcontextprotocol/inspector --config inspector-config.json --server sushimcp",
+    "generate:key": "node -e "console.log(crypto.randomUUID())"",
     "prepare": "husky",
     "prepublishOnly": "npm run build",
     "snapshot:update": "vitest run -u",
@@ -473,11 +476,10 @@ exports[`Configuration Files > should match tsconfig.json snapshot 1`] = `
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
-    "outDir": "./dist",
-    "rootDir": "./src",
     "lib": ["ES2022", "DOM"],
     "resolveJsonModule": true,
     "baseUrl": ".",
+    "types": ["node"],
     "paths": {
       "@modelcontextprotocol/sdk": [
         "./node_modules/@modelcontextprotocol/sdk/dist/esm"
@@ -486,9 +488,7 @@ exports[`Configuration Files > should match tsconfig.json snapshot 1`] = `
       "#tools/*": ["./src/tools/*"],
       "#resources/*": ["./src/resources/*"]
     }
-  },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  }
 }
 "
 `;
