@@ -1,6 +1,7 @@
 - hono: https://hono.dev/llms.txt
 - hono_full: https://hono.dev/llms-full.txt
 - drizzle: https://orm.drizzle.team/llms.txt
+- drizzle_full: https://orm.drizzle.team/llms-full.txt
 - better-auth: https://better-auth.com/llms.txt
 - cloudflare: https://developers.cloudflare.com/llms.txt
 - cloudflare_full: https://developers.cloudflare.com/llms-full.txt
@@ -61,3 +62,5 @@
 - langchain_js: https://js.langchain.com/llms.txt
 - mastra: https://mastra.ai/llms.txt
 - mastra_full: https://mastra.ai/llms-full.txt
+- vitest: https://vitest.dev/llms.txt
+- vitest_full: https://vitest.dev/llms-full.txt

@@ -10,7 +10,7 @@ if [ -f "$(dirname "$0")/.env" ]; then
 fi
 
 # Validate required variables
-if [ -z "$GITHUB_PROXY_URL" ] || [ -z "$GITHUB_PROXY_KEY" ] || [ -z "$GITHUB_OWNER" ] || [ -z "$GITHUB_ORG" ] || [ -z "$GITHUB_MERGE_METHOD" ]; then
+if [ -z "$API_URL" ] || [ -z "$API_KEY" ]; then
   echo "Error: Missing required environment variables. Please create a .env file based on .env.example"
   exit 1
 fi
@@ -37,22 +37,16 @@ for i in "${!ARGS_ARRAY[@]}"; do
 done
 
 # Export environment variables so they're available to the MCP server
-export GITHUB_PROXY_URL
-export GITHUB_PROXY_KEY
-export GITHUB_OWNER
-export GITHUB_ORG
-export GITHUB_MERGE_METHOD
+export API_URL
+export API_KEY
 
 # Register the MCP server using Claude's CLI
 # Environment variables must come before the server name
 # Use -- to separate claude mcp add options from the server command
 # ARGS are parsed from .env and passed as separate arguments to node
 claude mcp add --scope user \
-  -e GITHUB_PROXY_URL="$GITHUB_PROXY_URL" \
-  -e GITHUB_PROXY_KEY="$GITHUB_PROXY_KEY" \
-  -e GITHUB_OWNER="$GITHUB_OWNER" \
-  -e GITHUB_ORG="$GITHUB_ORG" \
-  -e GITHUB_MERGE_METHOD="$GITHUB_MERGE_METHOD" \
+  -e API_URL="$API_URL" \
+  -e API_KEY="$API_KEY" \
   -- \
   sushimcp "node" "$ENTRY_POINT" "${ARGS_ARRAY[@]}"
 

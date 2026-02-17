@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 
+import { z } from "zod";
 import { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
@@ -12,21 +13,103 @@ import {
   fetch_llms_txt,
   fetch_openapi_spec,
   list_openapi_spec_sources,
-  github_projects,
-  github_pull_requests,
-  github_issues,
+  api_list_llms_txt_sources,
+  api_list_openapi_spec_sources,
+  api_github_issues,
+  api_github_pull_requests,
+  api_github_projects,
+  api_search_fetch_llms_txt,
+  api_search_fetch_openapi_spec,
   UrlFetchInputSchema,
   GitHubProjectsInputSchema,
   GitHubPullRequestsInputSchema,
   GitHubIssuesInputSchema,
 } from "#tools/index.js";
-import { parseCliArgs, getVersion, logger } from "#lib/index.js";
+import {
+  parseCliArgs,
+  getVersion,
+  logger,
+  initApiClient,
+  listLlmsTxtSources,
+  listOpenapiSources,
+} from "#lib/index.js";
 import { processDefaultsResources } from "#resources/index.js";
 
 // --- Parse CLI Arguments --- //
-const { docSources, allowedDomains, openApiSpecs } = parseCliArgs();
+const { docSources, allowedDomains: cliAllowedDomains, openApiSpecs } =
+  parseCliArgs();
 
-// --- Determine Mode --- //
+// --- Determine Thin Client Mode --- //
+const envApiUrl = process.env.API_URL;
+const envApiKey = process.env.API_KEY;
+const thinClientMode = !!(envApiUrl && envApiKey);
+
+if (thinClientMode) {
+  initApiClient(envApiUrl, envApiKey);
+
+  const hasCliSources =
+    Object.keys(docSources).length > 0 || Object.keys(openApiSpecs).length > 0;
+  if (hasCliSources) {
+    logger.warn(
+      "CLI source arguments are ignored in thin client mode (API_URL is set)",
+    );
+  }
+}
+
+// In thin client mode, domains are loaded from the API after server.connect().
+// Use wildcard initially so the server can start without blocking on network calls.
+let allowedDomains: Set<string> = thinClientMode
+  ? new Set<string>(["*"])
+  : cliAllowedDomains;
+
+async function loadAllowedDomainsFromApi(): Promise<void> {
+  try {
+    const [llmsSources, openapiSourcesList] = await Promise.all([
+      listLlmsTxtSources(),
+      listOpenapiSources(),
+    ]);
+
+    const domains = new Set<string>();
+    for (const source of llmsSources) {
+      for (const url of [
+        source.baseUrl,
+        source.siteUrl,
+        source.llmsTxtUrl,
+        source.llmsFullTxtUrl,
+        source.llmsMiniTxtUrl,
+      ]) {
+        if (url) {
+          try {
+            domains.add(new URL(url).hostname);
+          } catch {
+            // skip malformed URLs
+          }
+        }
+      }
+    }
+    for (const source of openapiSourcesList) {
+      if (source.url) {
+        try {
+          domains.add(new URL(source.url).hostname);
+        } catch {
+          // skip malformed URLs
+        }
+      }
+    }
+
+    allowedDomains = domains;
+    logger.info(
+      `Loaded ${domains.size} allowed domains from ${llmsSources.length + openapiSourcesList.length} API sources`,
+    );
+  } catch (err) {
+    logger.error(
+      `Failed to load sources from API: ${err instanceof Error ? err.message : err}`,
+    );
+    logger.warn("Keeping wildcard domain access as fallback");
+  }
+}
+
+// --- Determine Transport Mode --- //
 const args = process.argv.slice(2);
 const isSseMode = args.includes("--sse");
 
@@ -38,8 +121,13 @@ if (isSseMode) {
   logger.info("Running in SSE mode - using console methods for logging");
   logger.debug("Debug logging is enabled");
 } else {
-  // In stdio mode, we still log but it will be in JSON format
   logger.info("Running in stdio mode - using JSON logging");
+}
+
+if (thinClientMode) {
+  logger.info("Thin client mode enabled — tools will proxy through API");
+} else {
+  logger.info("Direct mode — using CLI-configured sources");
 }
 
 // --- MCP Server Setup --- //
@@ -61,6 +149,8 @@ const server = new McpServer(
   },
 );
 
+// --- List Tools (mode-dependent) --- //
+
 server.registerTool(
   "list_llms_txt_sources",
   {
@@ -75,8 +165,10 @@ server.registerTool(
       openWorldHint: false,
     },
   },
-  (extra: RequestHandlerExtra<ServerRequest, ServerNotification>) =>
-    list_llms_txt_sources(extra, docSources),
+  thinClientMode
+    ? () => api_list_llms_txt_sources()
+    : (extra: RequestHandlerExtra<ServerRequest, ServerNotification>) =>
+        list_llms_txt_sources(extra, docSources),
 );
 
 server.registerTool(
@@ -93,9 +185,13 @@ server.registerTool(
       openWorldHint: false,
     },
   },
-  (extra: RequestHandlerExtra<ServerRequest, ServerNotification>) =>
-    list_openapi_spec_sources(extra, openApiSpecs),
+  thinClientMode
+    ? () => api_list_openapi_spec_sources()
+    : (extra: RequestHandlerExtra<ServerRequest, ServerNotification>) =>
+        list_openapi_spec_sources(extra, openApiSpecs),
 );
+
+// --- Fetch Tools (same in both modes, allowedDomains differs) --- //
 
 server.registerTool(
   "fetch_llms_txt",
@@ -160,74 +256,140 @@ server.registerTool(
   },
 );
 
-server.registerTool(
-  "github_projects",
-  {
-    title: "Manage GitHub Project items",
-    description:
-      "Manages GitHub Project items for planning and tracking work. Supports listing, getting, creating, updating, and deleting project items within a GitHub ProjectV2 board. Use this to create and manage tasks, update statuses, and track progress.",
-    inputSchema: GitHubProjectsInputSchema,
-    annotations: {
+// --- Search + Fetch Tool (thin client mode only) --- //
+
+if (thinClientMode) {
+  server.registerTool(
+    "search_fetch_llms_txt",
+    {
+      title: "Search and fetch llms.txt documentation",
+      description:
+        "Searches for a technology by name and fetches its llms.txt documentation in a single step. Prefers llms-full.txt when available, falls back to llms.txt, then llms-mini.txt. Returns the documentation content directly. Use this instead of listing all sources and fetching separately.",
+      inputSchema: {
+        query: z
+          .string()
+          .describe(
+            "Technology or library name to search for (e.g., 'hono', 'drizzle', 'ably')",
+          ),
+      },
+      annotations: {
+        title: "Search and fetch llms.txt documentation",
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async (params) => {
+      if (!params?.query) {
+        throw new Error("No query provided to search_fetch_llms_txt");
+      }
+      return api_search_fetch_llms_txt(params.query);
+    },
+  );
+
+  server.registerTool(
+    "search_fetch_openapi_spec",
+    {
+      title: "Search and fetch OpenAPI spec",
+      description:
+        "Searches for a technology by name and fetches its OpenAPI spec in a single step. Returns the spec content directly. Use this instead of listing all sources and fetching separately.",
+      inputSchema: {
+        query: z
+          .string()
+          .describe(
+            "Technology or API name to search for (e.g., 'stripe', 'twilio', 'github')",
+          ),
+      },
+      annotations: {
+        title: "Search and fetch OpenAPI spec",
+        readOnlyHint: true,
+        destructiveHint: false,
+        idempotentHint: true,
+        openWorldHint: true,
+      },
+    },
+    async (params) => {
+      if (!params?.query) {
+        throw new Error("No query provided to search_fetch_openapi_spec");
+      }
+      return api_search_fetch_openapi_spec(params.query);
+    },
+  );
+}
+
+// --- GitHub Tools (thin client mode only) --- //
+
+if (thinClientMode) {
+  server.registerTool(
+    "github_projects",
+    {
       title: "Manage GitHub Project items",
-      readOnlyHint: false,
-      destructiveHint: false,
-      idempotentHint: false,
-      openWorldHint: true,
+      description:
+        "Manages GitHub Project items for planning and tracking work. Supports listing, getting, creating, updating, and deleting project items within a GitHub ProjectV2 board. Use this to create and manage tasks, update statuses, and track progress.",
+      inputSchema: GitHubProjectsInputSchema,
+      annotations: {
+        title: "Manage GitHub Project items",
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: true,
+      },
     },
-  },
-  async (params) => {
-    if (!params) {
-      throw new Error("No input provided to github_projects");
-    }
-    return github_projects(params);
-  },
-);
+    async (params) => {
+      if (!params) {
+        throw new Error("No input provided to github_projects");
+      }
+      return api_github_projects(params);
+    },
+  );
 
-server.registerTool(
-  "github_pull_requests",
-  {
-    title: "Manage GitHub Pull Requests",
-    description:
-      "Manages GitHub Pull Requests for authoring, reviewing, and iterating on code changes. Supports creating PRs, listing open PRs, reading PR details, reading and posting comments (general and inline), requesting reviewers, merging, and closing PRs.",
-    inputSchema: GitHubPullRequestsInputSchema,
-    annotations: {
+  server.registerTool(
+    "github_pull_requests",
+    {
       title: "Manage GitHub Pull Requests",
-      readOnlyHint: false,
-      destructiveHint: false,
-      idempotentHint: false,
-      openWorldHint: true,
+      description:
+        "Manages GitHub Pull Requests for authoring, reviewing, and iterating on code changes. Supports creating PRs, listing open PRs, reading PR details, reading and posting comments (general and inline), requesting reviewers, merging, and closing PRs.",
+      inputSchema: GitHubPullRequestsInputSchema,
+      annotations: {
+        title: "Manage GitHub Pull Requests",
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: true,
+      },
     },
-  },
-  async (params) => {
-    if (!params) {
-      throw new Error("No input provided to github_pull_requests");
-    }
-    return github_pull_requests(params);
-  },
-);
+    async (params) => {
+      if (!params) {
+        throw new Error("No input provided to github_pull_requests");
+      }
+      return api_github_pull_requests(params);
+    },
+  );
 
-server.registerTool(
-  "github_issues",
-  {
-    title: "Manage GitHub Issues",
-    description:
-      "Manages GitHub Issues for tracking bugs, features, and tasks. Supports listing issues with filters, getting issue details, creating new issues, updating existing issues, closing issues, and adding issues to GitHub Projects.",
-    inputSchema: GitHubIssuesInputSchema,
-    annotations: {
+  server.registerTool(
+    "github_issues",
+    {
       title: "Manage GitHub Issues",
-      readOnlyHint: false,
-      destructiveHint: false,
-      idempotentHint: false,
-      openWorldHint: true,
+      description:
+        "Manages GitHub Issues for tracking bugs, features, and tasks. Supports listing issues with filters, getting issue details, creating new issues, updating existing issues, closing issues, and adding issues to GitHub Projects.",
+      inputSchema: GitHubIssuesInputSchema,
+      annotations: {
+        title: "Manage GitHub Issues",
+        readOnlyHint: false,
+        destructiveHint: false,
+        idempotentHint: false,
+        openWorldHint: true,
+      },
     },
-  },
-  async (params) => {
-    if (!params) {
-      throw new Error("No input provided to github_issues");
-    }
-    return github_issues(params);
-  },
-);
+    async (params) => {
+      if (!params) {
+        throw new Error("No input provided to github_issues");
+      }
+      return api_github_issues(params);
+    },
+  );
+}
 
 // Process and register default resources
 const resources = processDefaultsResources();
@@ -251,7 +413,11 @@ try {
 
   // Log startup information using the logger
   logger.info(`SushiMCP server v${VERSION} started successfully`);
-  if (allowedDomains.size > 0) {
+
+  // Load allowed domains from API in the background (non-blocking)
+  if (thinClientMode) {
+    loadAllowedDomainsFromApi();
+  } else if (allowedDomains.size > 0) {
     logger.debug(`Allowed domains: ${Array.from(allowedDomains).join(", ")}`);
   }
 } catch (error: unknown) {
