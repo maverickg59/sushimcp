@@ -1,6 +1,7 @@
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { searchOpenapiSources } from "#lib/api_client.js";
 import { logger } from "#lib/logger.js";
+import { readCache, writeCache, formatCacheSummary } from "#lib/cache.js";
 
 const FETCH_TIMEOUT_MS = 30_000;
 
@@ -23,6 +24,28 @@ export const api_search_fetch_openapi_spec = async (
   }
 
   const source = sources[0];
+
+  const otherMatches =
+    sources.length > 1
+      ? `\nOther matches: ${sources
+          .slice(1, 6)
+          .map((s) => s.name)
+          .join(", ")}`
+      : "";
+
+  // Check cache first
+  const cached = await readCache(source.url, "openapi");
+  if (cached) {
+    const summary = formatCacheSummary(source.name, "OpenAPI spec", source.url, cached);
+    return {
+      content: [
+        {
+          type: "text",
+          text: `${summary}${otherMatches}`,
+        },
+      ],
+    };
+  }
 
   logger.debug(
     `Fetching OpenAPI spec for "${source.name}" from ${source.url}`,
@@ -51,20 +74,17 @@ export const api_search_fetch_openapi_spec = async (
     };
   }
 
-  const header = `Source: ${source.name}\nURL: ${source.url}`;
-  const otherMatches =
-    sources.length > 1
-      ? `\nOther matches: ${sources
-          .slice(1, 6)
-          .map((s) => s.name)
-          .join(", ")}`
-      : "";
+  // Write to cache and return file path summary
+  const hit = await writeCache(source.url, content, "openapi", {
+    sourceName: source.name,
+  });
 
+  const summary = formatCacheSummary(source.name, "OpenAPI spec", source.url, hit);
   return {
     content: [
       {
         type: "text",
-        text: `${header}${otherMatches}\n\n${content}`,
+        text: `${summary}${otherMatches}`,
       },
     ],
   };

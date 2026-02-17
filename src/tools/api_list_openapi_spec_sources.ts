@@ -15,13 +15,15 @@ export const api_list_openapi_spec_sources =
       };
     }
 
-    let formatted = "Available OpenAPI specifications:\n";
-    for (const source of sources) {
-      formatted += `- ${source.name}: ${source.url}\n`;
+    const names = sources.map((s) => s.name).sort((a, b) => a.localeCompare(b));
+    let formatted = `Available OpenAPI specifications (${sources.length}):\n`;
+    for (const name of names) {
+      formatted += `- ${name}\n`;
     }
+    formatted += "\nUse search_fetch_openapi_spec to fetch a spec by name.";
 
     const content: TextContent[] = [
-      { type: "text", text: formatted.trim() },
+      { type: "text", text: formatted },
     ];
     return { content };
   };

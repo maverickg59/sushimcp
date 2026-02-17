@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { fetch_openapi_spec } from "#tools/fetch_openapi_spec";
 import * as utils from "#lib/utils";
+import * as cache from "#lib/cache";
 import { logger } from "#lib/index";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import type {
@@ -18,6 +19,19 @@ vi.mock("#lib/utils", async () => {
     checkDomainAccess: vi.fn(),
   };
 });
+
+vi.mock("#lib/cache", () => ({
+  readCache: vi.fn().mockResolvedValue(null),
+  writeCache: vi.fn().mockImplementation(async (url: string, content: string, type: string) => ({
+    filePath: `/mock-cache/${type}/test.txt`,
+    meta: { url, fetchedAt: Date.now() },
+    size: content.length,
+  })),
+  formatCacheSummary: vi.fn().mockImplementation(
+    (sourceName: string, variant: string, url: string, hit: { filePath: string; size: number }) =>
+      `Source: ${sourceName} (${variant})\nURL: ${url}\nFile: ${hit.filePath} (${hit.size} characters)\n\nRead the file above to access the documentation content.`
+  ),
+}));
 
 describe("fetch_openapi_spec", () => {
   const mockExtra = {} as RequestHandlerExtra<
@@ -61,6 +75,10 @@ describe("fetch_openapi_spec", () => {
       mockAllowedDomains
     );
 
+    expect(cache.readCache).toHaveBeenCalledWith(
+      "https://example.com/openapi.json",
+      "openapi"
+    );
     expect(utils.parseFetchTarget).toHaveBeenCalledWith(
       "https://example.com/openapi.json"
     );
@@ -80,10 +98,12 @@ describe("fetch_openapi_spec", () => {
       mockAllowedDomains
     );
     expect(utils.fetchContent).toHaveBeenCalledWith(mockTargetInfo);
+    expect(cache.writeCache).toHaveBeenCalled();
 
-    expect(result).toEqual({
-      content: [{ type: "text", text: mockApiSpec }],
-    });
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0]).toHaveProperty("type", "text");
+    expect((result.content[0] as { text: string }).text).toContain("https://example.com/openapi.json");
+    expect((result.content[0] as { text: string }).text).toContain("Read the file above");
 
     debugSpy.mockRestore();
   });
@@ -140,12 +160,10 @@ describe("fetch_openapi_spec", () => {
     // Verify results
     expect(utils.parseFetchTarget).toHaveBeenCalledTimes(2);
     expect(utils.fetchContent).toHaveBeenCalledTimes(2);
-    expect(result).toEqual({
-      content: [
-        { type: "text", text: mockApiSpec1 },
-        { type: "text", text: mockApiSpec2 },
-      ],
-    });
+    expect(cache.writeCache).toHaveBeenCalledTimes(2);
+    expect(result.content).toHaveLength(2);
+    expect((result.content[0] as { text: string }).text).toContain("https://example.com/openapi.json");
+    expect((result.content[1] as { text: string }).text).toContain("https://api.example.org/openapi.json");
 
     // Verify debug logs were called with expected messages
     const debugCalls = debugSpy.mock.calls.flat();
@@ -308,9 +326,8 @@ describe("fetch_openapi_spec", () => {
       "https://example.com/openapi.json"
     );
 
-    expect(result).toEqual({
-      content: [{ type: "text", text: mockApiSpec }],
-    });
+    expect(result.content).toHaveLength(1);
+    expect((result.content[0] as { text: string }).text).toContain("https://example.com/openapi.json");
   });
 
   it("should handle array of string URLs input format", async () => {
@@ -355,12 +372,9 @@ describe("fetch_openapi_spec", () => {
     expect(utils.parseFetchTarget).toHaveBeenCalledTimes(2);
     expect(utils.fetchContent).toHaveBeenCalledTimes(2);
 
-    expect(result).toEqual({
-      content: [
-        { type: "text", text: mockApiSpec1 },
-        { type: "text", text: mockApiSpec2 },
-      ],
-    });
+    expect(result.content).toHaveLength(2);
+    expect((result.content[0] as { text: string }).text).toContain("https://example.com/openapi.json");
+    expect((result.content[1] as { text: string }).text).toContain("https://api.example.org/openapi.json");
   });
 
   it("should handle error in URL processing", async () => {
@@ -381,5 +395,36 @@ describe("fetch_openapi_spec", () => {
     );
 
     errorSpy.mockRestore();
+  });
+
+  it("should return cached result on cache hit", async () => {
+    const mockCacheHit = {
+      filePath: "/mock-cache/openapi/cached.txt",
+      meta: {
+        url: "https://example.com/openapi.json",
+        fetchedAt: Date.now(),
+        sourceName: "example",
+        variant: "OpenAPI spec",
+      },
+      size: 1200,
+    };
+
+    vi.mocked(cache.readCache).mockResolvedValueOnce(mockCacheHit);
+
+    const result = await fetch_openapi_spec(
+      { url: "https://example.com/openapi.json" },
+      mockExtra,
+      mockAllowedDomains
+    );
+
+    expect(cache.readCache).toHaveBeenCalledWith(
+      "https://example.com/openapi.json",
+      "openapi"
+    );
+    // Should NOT call parseFetchTarget or fetchContent on cache hit
+    expect(utils.parseFetchTarget).not.toHaveBeenCalled();
+    expect(utils.fetchContent).not.toHaveBeenCalled();
+    expect(result.content).toHaveLength(1);
+    expect((result.content[0] as { text: string }).text).toContain("https://example.com/openapi.json");
   });
 });

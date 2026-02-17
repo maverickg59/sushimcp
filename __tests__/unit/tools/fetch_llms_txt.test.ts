@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { fetch_llms_txt } from "#tools/fetch_llms_txt";
 import * as utils from "#lib/utils";
+import * as cache from "#lib/cache";
 import { logger } from "#lib/index";
 import type { RequestHandlerExtra } from "@modelcontextprotocol/sdk/shared/protocol.js";
 import type {
@@ -18,6 +19,19 @@ vi.mock("#lib/utils", async () => {
     checkDomainAccess: vi.fn(),
   };
 });
+
+vi.mock("#lib/cache", () => ({
+  readCache: vi.fn().mockResolvedValue(null),
+  writeCache: vi.fn().mockImplementation(async (url: string, content: string, type: string) => ({
+    filePath: `/mock-cache/${type}/test.txt`,
+    meta: { url, fetchedAt: Date.now() },
+    size: content.length,
+  })),
+  formatCacheSummary: vi.fn().mockImplementation(
+    (sourceName: string, variant: string, url: string, hit: { filePath: string; size: number }) =>
+      `Source: ${sourceName} (${variant})\nURL: ${url}\nFile: ${hit.filePath} (${hit.size} characters)\n\nRead the file above to access the documentation content.`
+  ),
+}));
 
 describe("fetch_llms_txt", () => {
   const mockExtra = {} as RequestHandlerExtra<
@@ -58,6 +72,10 @@ describe("fetch_llms_txt", () => {
       mockAllowedDomains
     );
 
+    expect(cache.readCache).toHaveBeenCalledWith(
+      "https://example.com/llms.txt",
+      "llms-txt"
+    );
     expect(utils.parseFetchTarget).toHaveBeenCalledWith(
       "https://example.com/llms.txt"
     );
@@ -77,10 +95,12 @@ describe("fetch_llms_txt", () => {
       mockAllowedDomains
     );
     expect(utils.fetchContent).toHaveBeenCalledWith(mockTargetInfo);
+    expect(cache.writeCache).toHaveBeenCalled();
 
-    expect(result).toEqual({
-      content: [{ type: "text", text: "Content from llms.txt" }],
-    });
+    expect(result.content).toHaveLength(1);
+    expect(result.content[0]).toHaveProperty("type", "text");
+    expect((result.content[0] as { text: string }).text).toContain("https://example.com/llms.txt");
+    expect((result.content[0] as { text: string }).text).toContain("Read the file above");
 
     debugSpy.mockRestore();
   });
@@ -125,12 +145,10 @@ describe("fetch_llms_txt", () => {
     // Verify results
     expect(utils.parseFetchTarget).toHaveBeenCalledTimes(2);
     expect(utils.fetchContent).toHaveBeenCalledTimes(2);
-    expect(result).toEqual({
-      content: [
-        { type: "text", text: "Content from first source" },
-        { type: "text", text: "Content from second source" },
-      ],
-    });
+    expect(cache.writeCache).toHaveBeenCalledTimes(2);
+    expect(result.content).toHaveLength(2);
+    expect((result.content[0] as { text: string }).text).toContain("https://example.com/llms.txt");
+    expect((result.content[1] as { text: string }).text).toContain("https://docs.example.org/llms.txt");
 
     // Verify debug logs were called with expected messages
     const debugCalls = debugSpy.mock.calls.flat();
@@ -294,9 +312,8 @@ describe("fetch_llms_txt", () => {
     expect(utils.parseFetchTarget).toHaveBeenCalledWith(
       "https://example.com/llms.txt"
     );
-    expect(result).toEqual({
-      content: [{ type: "text", text: "Content from string URL" }],
-    });
+    expect(result.content).toHaveLength(1);
+    expect((result.content[0] as { text: string }).text).toContain("https://example.com/llms.txt");
   });
 
   it("should handle array of string URLs input format", async () => {
@@ -327,12 +344,9 @@ describe("fetch_llms_txt", () => {
 
     expect(utils.parseFetchTarget).toHaveBeenCalledTimes(2);
     expect(utils.fetchContent).toHaveBeenCalledTimes(2);
-    expect(result).toEqual({
-      content: [
-        { type: "text", text: "Content from first source" },
-        { type: "text", text: "Content from second source" },
-      ],
-    });
+    expect(result.content).toHaveLength(2);
+    expect((result.content[0] as { text: string }).text).toContain("https://example.com/llms.txt");
+    expect((result.content[1] as { text: string }).text).toContain("https://docs.example.org/llms.txt");
   });
 
   it("should handle error in URL processing", async () => {
@@ -353,7 +367,7 @@ describe("fetch_llms_txt", () => {
     expect(error.message).toContain("Invalid URL");
   });
 
-  it("should handle string URL input format", async () => {
+  it("should handle string URL input format with domain check", async () => {
     const mockTargetInfo = {
       type: "remote" as const,
       url: new URL("https://example.com/llms.txt"),
@@ -379,9 +393,8 @@ describe("fetch_llms_txt", () => {
       mockAllowedDomains
     );
     expect(utils.fetchContent).toHaveBeenCalledWith(mockTargetInfo);
-    expect(result).toEqual({
-      content: [{ type: "text", text: "Content from string URL" }],
-    });
+    expect(result.content).toHaveLength(1);
+    expect((result.content[0] as { text: string }).text).toContain("https://example.com/llms.txt");
   });
 
   it("should handle fetch content error", async () => {
@@ -468,13 +481,10 @@ describe("fetch_llms_txt", () => {
     // Verify both fetchContent calls were made
     expect(utils.fetchContent).toHaveBeenCalledTimes(2);
 
-    // Verify the results
-    expect(result).toEqual({
-      content: [
-        { type: "text", text: "Content from string URL" },
-        { type: "text", text: "Content from object URL" },
-      ],
-    });
+    // Verify the results contain file path summaries
+    expect(result.content).toHaveLength(2);
+    expect((result.content[0] as { text: string }).text).toContain("https://example.com/llms.txt");
+    expect((result.content[1] as { text: string }).text).toContain("https://docs.example.org/llms.txt");
   });
 
   it("should handle fetch content error with network error", async () => {
@@ -515,5 +525,36 @@ describe("fetch_llms_txt", () => {
     ).toBe(true);
 
     errorSpy.mockRestore();
+  });
+
+  it("should return cached result on cache hit", async () => {
+    const mockCacheHit = {
+      filePath: "/mock-cache/llms-txt/cached.txt",
+      meta: {
+        url: "https://example.com/llms.txt",
+        fetchedAt: Date.now(),
+        sourceName: "example",
+        variant: "llms.txt",
+      },
+      size: 500,
+    };
+
+    vi.mocked(cache.readCache).mockResolvedValueOnce(mockCacheHit);
+
+    const result = await fetch_llms_txt(
+      { url: "https://example.com/llms.txt" },
+      mockExtra,
+      mockAllowedDomains
+    );
+
+    expect(cache.readCache).toHaveBeenCalledWith(
+      "https://example.com/llms.txt",
+      "llms-txt"
+    );
+    // Should NOT call parseFetchTarget or fetchContent on cache hit
+    expect(utils.parseFetchTarget).not.toHaveBeenCalled();
+    expect(utils.fetchContent).not.toHaveBeenCalled();
+    expect(result.content).toHaveLength(1);
+    expect((result.content[0] as { text: string }).text).toContain("https://example.com/llms.txt");
   });
 });

@@ -32,8 +32,13 @@ import {
   initApiClient,
   listLlmsTxtSources,
   listOpenapiSources,
+  cleanExpiredEntries,
 } from "#lib/index.js";
-import { processDefaultsResources } from "#resources/index.js";
+import {
+  processDefaultsResources,
+  createLlmsTxtResourceTemplate,
+  createOpenapiResourceTemplate,
+} from "#resources/index.js";
 
 // --- Parse CLI Arguments --- //
 const { docSources, allowedDomains: cliAllowedDomains, openApiSpecs } =
@@ -155,8 +160,9 @@ server.registerTool(
   "list_llms_txt_sources",
   {
     title: "List llms.txt sources",
-    description:
-      "This tool lists all available source urls where an llms.txt can be fetched. After reading the listed sources, use fetch_llms_txt to fetch any source that matches a technology in the instructions you received. Prefer llms.txt, but if llms.txt proves inadequate, check to see if other llms-full.txt or llms-mini.txt exist. When done, ask the user if they want to use other tools to search for documentation on any sources this tool could not find.",
+    description: thinClientMode
+      ? "Lists all available llms.txt sources by name, grouped by category. Use search_fetch_llms_txt to fetch documentation for any source by name."
+      : "Lists all available llms.txt source URLs. Use fetch_llms_txt to fetch any listed URL. Prefer llms-full.txt when available, fall back to llms.txt, then llms-mini.txt.",
     annotations: {
       title: "List llms.txt sources",
       readOnlyHint: true,
@@ -175,8 +181,9 @@ server.registerTool(
   "list_openapi_spec_sources",
   {
     title: "List OpenAPI spec sources",
-    description:
-      "This tool lists all available source urls where an OpenAPI spec can be fetched.",
+    description: thinClientMode
+      ? "Lists all available OpenAPI spec sources by name. Use search_fetch_openapi_spec to fetch a spec by name."
+      : "Lists all available OpenAPI spec source URLs. Use fetch_openapi_spec to fetch any listed URL.",
     annotations: {
       title: "List OpenAPI spec sources",
       readOnlyHint: true,
@@ -198,7 +205,7 @@ server.registerTool(
   {
     title: "Fetch llms.txt content",
     description:
-      "Fetches the content of one or more llms.txt URLs. Some llms.txt files compile a list of urls to other llms.txt file locations because listing their full documentation would bloat context. If the documentation you're looking for does not exist in the llms.txt, look for reference links to other llms.txt files and follow those.",
+      "Fetches the content of one or more llms.txt URLs. Some llms.txt files contain reference links to other llms.txt files instead of full documentation. If the content you need is not in the result, follow those reference links.",
     inputSchema: {
       input: UrlFetchInputSchema.describe(
         "URL string, URL object, or array of URL/objects to fetch llms.txt from",
@@ -326,7 +333,7 @@ if (thinClientMode) {
     {
       title: "Manage GitHub Project items",
       description:
-        "Manages GitHub Project items for planning and tracking work. Supports listing, getting, creating, updating, and deleting project items within a GitHub ProjectV2 board. Use this to create and manage tasks, update statuses, and track progress.",
+        "Manages GitHub ProjectV2 board items. Supports listing, getting, creating, updating, and deleting project items. Set status, iteration, and priority fields by human-readable value.",
       inputSchema: GitHubProjectsInputSchema,
       annotations: {
         title: "Manage GitHub Project items",
@@ -349,7 +356,7 @@ if (thinClientMode) {
     {
       title: "Manage GitHub Pull Requests",
       description:
-        "Manages GitHub Pull Requests for authoring, reviewing, and iterating on code changes. Supports creating PRs, listing open PRs, reading PR details, reading and posting comments (general and inline), requesting reviewers, merging, and closing PRs.",
+        "Manages GitHub Pull Requests. Supports creating PRs, listing open PRs, getting PR details, listing and posting comments (general and inline), requesting reviewers, merging, and closing PRs.",
       inputSchema: GitHubPullRequestsInputSchema,
       annotations: {
         title: "Manage GitHub Pull Requests",
@@ -372,7 +379,7 @@ if (thinClientMode) {
     {
       title: "Manage GitHub Issues",
       description:
-        "Manages GitHub Issues for tracking bugs, features, and tasks. Supports listing issues with filters, getting issue details, creating new issues, updating existing issues, closing issues, and adding issues to GitHub Projects.",
+        "Manages GitHub Issues. Supports listing issues with filters, getting issue details, creating new issues, updating existing issues, closing issues, and adding issues to GitHub Projects.",
       inputSchema: GitHubIssuesInputSchema,
       annotations: {
         title: "Manage GitHub Issues",
@@ -391,20 +398,19 @@ if (thinClientMode) {
   );
 }
 
-// Process and register default resources
-const resources = processDefaultsResources();
-resources.forEach(({ id, uri, title, description, mimeType, handler }) => {
-  server.resource(
-    id,
-    uri,
-    {
-      title,
-      description,
-      mimeType,
-    },
-    handler,
-  );
-});
+// Process and register resources (mode-dependent)
+if (thinClientMode) {
+  const llms = createLlmsTxtResourceTemplate();
+  server.resource("llms-txt-source", llms.template, llms.metadata, llms.readCallback);
+
+  const openapi = createOpenapiResourceTemplate();
+  server.resource("openapi-source", openapi.template, openapi.metadata, openapi.readCallback);
+} else {
+  const resources = processDefaultsResources();
+  resources.forEach(({ id, uri, title, description, mimeType, handler }) => {
+    server.resource(id, uri, { title, description, mimeType }, handler);
+  });
+}
 
 // --- Start Server --- //
 try {
@@ -413,6 +419,11 @@ try {
 
   // Log startup information using the logger
   logger.info(`SushiMCP server v${VERSION} started successfully`);
+
+  // Clean expired cache entries in the background (non-blocking)
+  cleanExpiredEntries().catch((err) => {
+    logger.error(`Cache cleanup failed: ${err instanceof Error ? err.message : err}`);
+  });
 
   // Load allowed domains from API in the background (non-blocking)
   if (thinClientMode) {

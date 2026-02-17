@@ -11,6 +11,9 @@ import {
   checkDomainAccess,
   normalizeUrlInput,
   logger,
+  readCache,
+  writeCache,
+  formatCacheSummary,
 } from "#lib/index.js";
 import { type UrlFetchInput } from "./tool_schemas.js";
 
@@ -39,6 +42,20 @@ export const fetch_llms_txt = async (
     try {
       logger.debug(`Processing URL: ${url}`);
 
+      // Check cache first
+      const cached = await readCache(url, "llms-txt");
+      if (cached) {
+        const summary = formatCacheSummary(
+          cached.meta.sourceName || "llms.txt",
+          cached.meta.variant || "llms.txt",
+          url,
+          cached,
+        );
+        results.push({ type: "text", text: summary });
+        logger.debug(`Cache hit for ${url}`);
+        continue;
+      }
+
       // Validate the URL and get target info using the library function
       const targetInfo = await parseFetchTarget(url);
       if (targetInfo.type === "unsupported") {
@@ -56,13 +73,19 @@ export const fetch_llms_txt = async (
 
       // Fetch the content using the library function
       const fileContent = await fetchContent(targetInfo);
-      results.push({
-        type: "text",
-        text: fileContent,
-      });
+
+      // Write to cache
+      const hit = await writeCache(url, fileContent, "llms-txt");
+      const summary = formatCacheSummary(
+        "llms.txt",
+        "llms.txt",
+        url,
+        hit,
+      );
+      results.push({ type: "text", text: summary });
 
       logger.debug(
-        `Successfully fetched ${fileContent.length} bytes from ${url}`,
+        `Successfully fetched ${fileContent.length} chars from ${url}`,
       );
     } catch (error) {
       const errorMsg = `Failed to process fetch request for ${url}: ${

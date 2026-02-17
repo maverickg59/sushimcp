@@ -13,28 +13,29 @@ export const api_list_llms_txt_sources =
       };
     }
 
-    let formatted = "Available llms.txt sources:\n";
+    const grouped = new Map<string, string[]>();
     for (const source of sources) {
-      const urls: string[] = [];
-      if (source.llmsTxtUrl) {
-        urls.push(`llms.txt: ${source.llmsTxtUrl}`);
-      }
-      if (source.llmsFullTxtUrl) {
-        urls.push(`llms-full.txt: ${source.llmsFullTxtUrl}`);
-      }
-      if (source.llmsMiniTxtUrl) {
-        urls.push(`llms-mini.txt: ${source.llmsMiniTxtUrl}`);
-      }
-
-      if (urls.length > 0) {
-        formatted += `- ${source.name}: ${urls.join(", ")}\n`;
-      } else {
-        formatted += `- ${source.name}: ${source.baseUrl} (no llms.txt URLs configured)\n`;
-      }
+      const category = source.category ?? "Other";
+      const names = grouped.get(category) ?? [];
+      names.push(source.name);
+      grouped.set(category, names);
     }
 
+    const sortedCategories = [...grouped.keys()].sort((a, b) => {
+      if (a === "Other") return 1;
+      if (b === "Other") return -1;
+      return a.localeCompare(b);
+    });
+
+    let formatted = `Available llms.txt sources (${sources.length}):\n\n`;
+    for (const category of sortedCategories) {
+      const names = grouped.get(category)!.sort((a, b) => a.localeCompare(b));
+      formatted += `${category}: ${names.join(", ")}\n`;
+    }
+    formatted += "\nUse search_fetch_llms_txt to fetch documentation for any source by name.";
+
     const content: TextContent[] = [
-      { type: "text", text: formatted.trim() },
+      { type: "text", text: formatted },
     ];
     return { content };
   };

@@ -1,6 +1,7 @@
 import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 import { searchLlmsTxtSources, type LlmsTxtSource } from "#lib/api_client.js";
 import { logger } from "#lib/logger.js";
+import { readCache, writeCache, formatCacheSummary } from "#lib/cache.js";
 
 function pickBestUrl(
   source: LlmsTxtSource,
@@ -58,6 +59,28 @@ export const api_search_fetch_llms_txt = async (
     };
   }
 
+  const otherMatches =
+    sources.length > 1
+      ? `\nOther matches: ${sources
+          .slice(1, 6)
+          .map((s) => s.name)
+          .join(", ")}`
+      : "";
+
+  // Check cache first
+  const cached = await readCache(best.url, "llms-txt");
+  if (cached) {
+    const summary = formatCacheSummary(source.name, best.type, best.url, cached);
+    return {
+      content: [
+        {
+          type: "text",
+          text: `${summary}${otherMatches}`,
+        },
+      ],
+    };
+  }
+
   logger.debug(
     `Fetching ${best.type} for "${source.name}" from ${best.url}`,
   );
@@ -86,20 +109,18 @@ export const api_search_fetch_llms_txt = async (
     };
   }
 
-  const header = `Source: ${source.name} (${best.type})\nURL: ${best.url}`;
-  const otherMatches =
-    sources.length > 1
-      ? `\nOther matches: ${sources
-          .slice(1, 6)
-          .map((s) => s.name)
-          .join(", ")}`
-      : "";
+  // Write to cache and return file path summary
+  const hit = await writeCache(best.url, content, "llms-txt", {
+    sourceName: source.name,
+    variant: best.type,
+  });
 
+  const summary = formatCacheSummary(source.name, best.type, best.url, hit);
   return {
     content: [
       {
         type: "text",
-        text: `${header}${otherMatches}\n\n${content}`,
+        text: `${summary}${otherMatches}`,
       },
     ],
   };
