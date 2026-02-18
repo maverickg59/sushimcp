@@ -246,3 +246,19 @@ export const GitHubIssuesInputSchema = z.object({
 });
 
 export type GitHubIssuesInput = z.infer<typeof GitHubIssuesInputSchema>;
+
+/**
+ * Schema for generating pseudo-llms.txt from a GitHub repository.
+ */
+export const GeneratePseudoLlmsTxtInputSchema = z.object({
+  repo: z
+    .string()
+    .url()
+    .describe(
+      "Full GitHub repository URL (e.g. https://github.com/owner/repo)",
+    ),
+});
+
+export type GeneratePseudoLlmsTxtInput = z.infer<
+  typeof GeneratePseudoLlmsTxtInputSchema
+>;

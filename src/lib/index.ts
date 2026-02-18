@@ -9,6 +9,7 @@ export * from "./embeddings.js";
 export * from "./chunker.js";
 export * from "./vectordb.js";
 export * from "./indexer.js";
+export * from "./github_repo.js";
 
 // Copyright (C) 2026 Christopher White
 // SPDX-License-Identifier: AGPL-3.0-or-later

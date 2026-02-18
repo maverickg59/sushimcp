@@ -21,10 +21,12 @@ import {
   api_search_fetch_llms_txt,
   api_search_fetch_openapi_spec,
   rag_search,
+  generate_pseudo_llms_txt,
   UrlFetchInputSchema,
   GitHubProjectsInputSchema,
   GitHubPullRequestsInputSchema,
   GitHubIssuesInputSchema,
+  GeneratePseudoLlmsTxtInputSchema,
 } from "#tools/index.js";
 import {
   parseCliArgs,
@@ -307,6 +309,31 @@ server.registerTool(
       source: params.source,
       limit: params.limit,
     });
+  },
+);
+
+// --- Generate Pseudo llms.txt (both modes) --- //
+
+server.registerTool(
+  "generate_pseudo_llms_txt",
+  {
+    title: "Generate pseudo llms.txt from GitHub repo",
+    description:
+      "Generates a pseudo-llms.txt document from a GitHub repository by fetching README, docs, and examples. Accepts a full GitHub URL (e.g. https://github.com/owner/repo).",
+    inputSchema: GeneratePseudoLlmsTxtInputSchema,
+    annotations: {
+      title: "Generate pseudo llms.txt from GitHub repo",
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
+  },
+  async (params) => {
+    if (!params?.repo) {
+      throw new Error("No repo URL provided to generate_pseudo_llms_txt");
+    }
+    return generate_pseudo_llms_txt({ repo: params.repo });
   },
 );
 
