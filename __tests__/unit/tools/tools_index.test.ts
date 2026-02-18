@@ -18,6 +18,8 @@ describe("Tools Index", () => {
     expect(typeof toolsExports.github_projects).toBe("function");
     expect(typeof toolsExports.github_pull_requests).toBe("function");
     expect(typeof toolsExports.github_issues).toBe("function");
+    expect(toolsExports).toHaveProperty("rag_search");
+    expect(typeof toolsExports.rag_search).toBe("function");
   });
 });
 

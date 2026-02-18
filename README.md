@@ -20,7 +20,7 @@ SushiMCP runs in two modes: **Direct Mode** for self-managed sources and **Thin 
 
 In direct mode, you provide your own llms.txt and OpenAPI spec URLs via CLI arguments. The server fetches documentation directly from those URLs. This is the default when no `API_URL` / `API_KEY` environment variables are set.
 
-**Tools available:** `list_llms_txt_sources`, `list_openapi_spec_sources`, `fetch_llms_txt`, `fetch_openapi_spec`
+**Tools available:** `list_llms_txt_sources`, `list_openapi_spec_sources`, `fetch_llms_txt`, `fetch_openapi_spec`, `rag_search`
 
 **Resources:** 67 built-in llms.txt resources from popular frameworks and libraries.
 
@@ -48,7 +48,7 @@ In thin client mode, the server proxies requests through a SushiMCP API backend.
 
 Thin client mode activates automatically when both `API_URL` and `API_KEY` environment variables are set. CLI source arguments are ignored in this mode.
 
-**Tools available:** Everything in direct mode, plus `search_fetch_llms_txt`, `search_fetch_openapi_spec`, `github_projects`, `github_pull_requests`, `github_issues`
+**Tools available:** Everything in direct mode, plus `search_fetch_llms_txt`, `search_fetch_openapi_spec`, `github_projects`, `github_pull_requests`, `github_issues`, `rag_search`
 
 **Resources:** Two resource templates (`sushimcp://llms-txt/{name}` and `sushimcp://openapi/{name}`) with autocomplete support, backed by the API's full source catalog.
 
@@ -66,6 +66,19 @@ Register with your MCP client:
   }
 }
 ```
+
+### RAG Search (optional, both modes)
+
+When [Ollama](https://ollama.com) is installed and running locally, fetched documentation is automatically chunked and embedded in the background. The `rag_search` tool then lets you semantic search indexed docs instead of reading entire files.
+
+```bash
+# Install Ollama and pull the embedding model
+ollama pull qwen3-embedding:4b
+```
+
+[Ollama Qwen3 Embedding](https://ollama.com/library/qwen3-embedding:4b)
+
+No configuration needed — RAG activates automatically when Ollama is detected. If Ollama is not running, all other tools work normally and `rag_search` returns a clear error message.
 
 See `.env.example` and `inspector-config.example.json` for additional configuration options including GitHub integration.
 

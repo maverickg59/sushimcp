@@ -67,6 +67,42 @@ Verified the cache works correctly in direct mode, thin client mode, and is port
 
 ---
 
+## 2026-02-17 — RAG pipeline (semantic search over cached docs)
+
+Added a local RAG pipeline so users can search indexed documentation by meaning instead of reading entire files. Documents are automatically chunked and embedded in the background when fetched; the new `rag_search` tool returns the most relevant chunks.
+
+### What changed
+
+- **Embedding client:** `src/lib/embeddings.ts` — Ollama batch embed client (`POST /api/embed`) with health check and retry logic. Uses `qwen3-embedding:4b` (2560 dims) by default. Session-cached availability status so Ollama is only pinged once.
+- **Chunker:** `src/lib/chunker.ts` — Two chunking strategies:
+  - *Markdown (llms-txt):* H2 → H3 → paragraph cascade adapted from devspec. Code block protection, heading prepended for context, deterministic IDs from `{source}#{heading-slug}`, SHA-256 content hashing.
+  - *OpenAPI (JSON):* Path-based splitting — one chunk per `{method} {path}` operation, one per component schema.
+  - Max 1500 chars per chunk.
+- **Vector store:** `src/lib/vectordb.ts` — LanceDB wrapper with explicit Apache Arrow schema, `mergeInsert` upserts, cosine similarity search with configurable character cap (default 9000), delete by source.
+- **Indexer:** `src/lib/indexer.ts` — Orchestrator that checks Ollama health, chunks content by type, embeds, and stores. Called fire-and-forget from the cache layer.
+- **Cache integration:** `src/lib/cache.ts` —
+  - Added `contentHash` field to `CacheMeta` for change detection.
+  - `writeCache` computes SHA-256 of content, compares against existing hash, skips re-indexing if unchanged, triggers fire-and-forget `indexContent` on new/changed content.
+  - `readCache` backfills indexing for docs cached before the RAG pipeline existed (no `contentHash` in meta).
+  - Default cache directory changed from `os.tmpdir()/sushimcp-cache` to `~/.sushimcp/cache` for persistence and security.
+- **RAG search tool:** `src/tools/rag_search.ts` — `rag_search` MCP tool registered in both direct and thin client modes. Embeds the query, searches the vector index, returns formatted chunks with similarity scores. Graceful errors when Ollama is unavailable or index is empty.
+- **Dependencies:** Added `@lancedb/lancedb` and `apache-arrow` (marked as tsup externals for native NAPI addon compatibility).
+
+### Environment variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OLLAMA_URL` | `http://localhost:11434` | Ollama API base URL |
+| `EMBEDDING_MODEL` | `qwen3-embedding:4b` | Embedding model name |
+| `EMBEDDING_DIMS` | `2560` | Vector dimensions |
+| `CACHE_DIR` | `~/.sushimcp/cache` | Cache and vector store location |
+
+### Content hash optimization
+
+When a cache entry is re-fetched, the content hash is compared before doing any embedding work. Docs that haven't changed (common for stable projects) never get re-embedded regardless of how many TTL cycles pass.
+
+---
+
 ## 2026-02-17 — Documentation updates
 
 - Updated `docker_plus_rag.md` roadmap: marked cache as completed, added portability audit findings, known limitations, and environment variable reference.

@@ -20,6 +20,7 @@ import {
   api_github_projects,
   api_search_fetch_llms_txt,
   api_search_fetch_openapi_spec,
+  rag_search,
   UrlFetchInputSchema,
   GitHubProjectsInputSchema,
   GitHubPullRequestsInputSchema,
@@ -41,8 +42,11 @@ import {
 } from "#resources/index.js";
 
 // --- Parse CLI Arguments --- //
-const { docSources, allowedDomains: cliAllowedDomains, openApiSpecs } =
-  parseCliArgs();
+const {
+  docSources,
+  allowedDomains: cliAllowedDomains,
+  openApiSpecs,
+} = parseCliArgs();
 
 // --- Determine Thin Client Mode --- //
 const envApiUrl = process.env.API_URL;
@@ -263,6 +267,49 @@ server.registerTool(
   },
 );
 
+// --- RAG Search Tool (both modes) --- //
+
+server.registerTool(
+  "rag_search",
+  {
+    title: "Search indexed documentation",
+    description:
+      "Searches previously fetched and indexed documentation using semantic similarity. " +
+      "Returns the most relevant chunks from cached docs. " +
+      "Documents are automatically indexed when fetched — use fetch tools first to populate the index.",
+    inputSchema: {
+      query: z
+        .string()
+        .describe("The search query (e.g., 'hono routing middleware')"),
+      source: z
+        .string()
+        .optional()
+        .describe("Optional: filter results to a specific source URL"),
+      limit: z
+        .number()
+        .optional()
+        .describe("Maximum number of chunks to return (default: 5)"),
+    },
+    annotations: {
+      title: "Search indexed documentation",
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+  },
+  async (params) => {
+    if (!params?.query) {
+      throw new Error("No query provided to rag_search");
+    }
+    return rag_search({
+      query: params.query,
+      source: params.source,
+      limit: params.limit,
+    });
+  },
+);
+
 // --- Search + Fetch Tool (thin client mode only) --- //
 
 if (thinClientMode) {
@@ -401,10 +448,20 @@ if (thinClientMode) {
 // Process and register resources (mode-dependent)
 if (thinClientMode) {
   const llms = createLlmsTxtResourceTemplate();
-  server.resource("llms-txt-source", llms.template, llms.metadata, llms.readCallback);
+  server.resource(
+    "llms-txt-source",
+    llms.template,
+    llms.metadata,
+    llms.readCallback,
+  );
 
   const openapi = createOpenapiResourceTemplate();
-  server.resource("openapi-source", openapi.template, openapi.metadata, openapi.readCallback);
+  server.resource(
+    "openapi-source",
+    openapi.template,
+    openapi.metadata,
+    openapi.readCallback,
+  );
 } else {
   const resources = processDefaultsResources();
   resources.forEach(({ id, uri, title, description, mimeType, handler }) => {
@@ -422,7 +479,9 @@ try {
 
   // Clean expired cache entries in the background (non-blocking)
   cleanExpiredEntries().catch((err) => {
-    logger.error(`Cache cleanup failed: ${err instanceof Error ? err.message : err}`);
+    logger.error(
+      `Cache cleanup failed: ${err instanceof Error ? err.message : err}`,
+    );
   });
 
   // Load allowed domains from API in the background (non-blocking)

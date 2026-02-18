@@ -14,6 +14,9 @@ export * from "./api_github.js";
 export * from "./api_search_fetch_llms_txt.js";
 export * from "./api_search_fetch_openapi_spec.js";
 
+// Export RAG search tool
+export * from "./rag_search.js";
+
 // Export schemas and types
 export {
   UrlFetchInputSchema,

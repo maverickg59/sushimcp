@@ -408,7 +408,9 @@ exports[`Configuration Files > should match package.json snapshot 1`] = `
     "url": "https://github.com/maverickg59/sushimcp/issues",
   },
   "dependencies": {
+    "@lancedb/lancedb": "[version]",
     "@modelcontextprotocol/sdk": "[version]",
+    "apache-arrow": "[version]",
     "commander": "[version]",
     "zod": "[version]",
   },
@@ -448,9 +450,9 @@ exports[`Configuration Files > should match package.json snapshot 1`] = `
     "url": "git+https://github.com/maverickg59/sushimcp.git",
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts --minify --tsconfig tsconfig.build.json && cp -r static/ dist/static",
+    "build": "tsup src/index.ts --format esm --dts --minify --tsconfig tsconfig.build.json --external @lancedb/lancedb --external apache-arrow && cp -r static/ dist/static",
     "clear:npx:cache": "npx clear-npx-cache",
-    "dev": "tsup src/index.ts --format esm --tsconfig tsconfig.build.json --watch",
+    "dev": "tsup src/index.ts --format esm --tsconfig tsconfig.build.json --external @lancedb/lancedb --external apache-arrow --watch",
     "dev:inspect": "npm run build && npx -y @modelcontextprotocol/inspector --config inspector-config.json --server sushimcp",
     "generate:key": "node -e "console.log(crypto.randomUUID())"",
     "prepare": "husky",

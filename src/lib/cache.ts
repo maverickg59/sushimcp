@@ -1,8 +1,9 @@
 import { createHash } from "node:crypto";
 import { mkdir, writeFile, readFile, readdir, unlink, lstat } from "node:fs/promises";
 import { join } from "node:path";
-import { tmpdir } from "node:os";
+import { homedir } from "node:os";
 import { logger } from "./logger.js";
+import { contentHash as computeContentHash, indexContent } from "./indexer.js";
 
 export type CacheType = "llms-txt" | "openapi";
 
@@ -11,6 +12,7 @@ export interface CacheMeta {
   fetchedAt: number;
   sourceName?: string;
   variant?: string;
+  contentHash?: string;
 }
 
 export interface CacheHit {
@@ -35,7 +37,7 @@ function cacheKey(url: string): string {
 }
 
 export function getCacheDir(): string {
-  return process.env.CACHE_DIR || join(tmpdir(), "sushimcp-cache");
+  return process.env.CACHE_DIR || join(homedir(), ".sushimcp", "cache");
 }
 
 function subDir(type: CacheType): string {
@@ -77,6 +79,19 @@ export async function readCache(url: string, type: CacheType): Promise<CacheHit 
 
     const content = await readFile(contentPath, "utf-8");
 
+    // If cached before RAG pipeline existed (no contentHash), backfill index
+    if (!meta.contentHash) {
+      const hash = computeContentHash(content);
+      meta.contentHash = hash;
+      writeFile(metaPath, JSON.stringify(meta), { mode: 0o600 }).catch(() => {});
+      logger.debug(`Backfilling index for cached doc ${url}`);
+      indexContent(url, content, type).catch((err) => {
+        logger.error(
+          `Backfill indexing failed for ${url}: ${err instanceof Error ? err.message : err}`,
+        );
+      });
+    }
+
     logger.debug(`Cache hit for ${url} (${content.length} chars)`);
     return {
       filePath: contentPath,
@@ -102,9 +117,28 @@ export async function writeCache(
   const contentPath = join(dir, `${key}.txt`);
   const metaPath = join(dir, `${key}.meta.json`);
 
+  // Compute content hash for change detection
+  const newHash = computeContentHash(content);
+
+  // Check if content is unchanged (same hash as existing meta)
+  let hashChanged = true;
+  try {
+    if (await isRegularFile(metaPath)) {
+      const existingRaw = await readFile(metaPath, "utf-8");
+      const existingMeta: CacheMeta = JSON.parse(existingRaw);
+      if (existingMeta.contentHash === newHash) {
+        hashChanged = false;
+        logger.debug(`Content unchanged for ${url}, skipping re-index`);
+      }
+    }
+  } catch {
+    // Corrupt or missing meta — treat as changed
+  }
+
   const fullMeta: CacheMeta = {
     url,
     fetchedAt: Date.now(),
+    contentHash: newHash,
     ...meta,
   };
 
@@ -112,6 +146,15 @@ export async function writeCache(
   await writeFile(metaPath, JSON.stringify(fullMeta), { mode: 0o600 });
 
   logger.debug(`Cached ${content.length} chars for ${url} at ${contentPath}`);
+
+  // Fire-and-forget: index content if hash changed
+  if (hashChanged) {
+    indexContent(url, content, type).catch((err) => {
+      logger.error(
+        `Background indexing failed for ${url}: ${err instanceof Error ? err.message : err}`,
+      );
+    });
+  }
 
   return {
     filePath: contentPath,
