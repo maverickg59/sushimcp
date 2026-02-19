@@ -8,9 +8,9 @@
     "sushimcp": "dist/index.js"
   },
   "scripts": {
-    "dev": "tsup src/index.ts --format esm --tsconfig tsconfig.build.json --external @lancedb/lancedb --external apache-arrow --watch",
+    "dev": "tsup src/index.ts --format esm --tsconfig tsconfig.build.json --external @lancedb/lancedb --external apache-arrow --external defuddle --external jsdom --watch",
     "dev:inspect": "npm run build && npx -y @modelcontextprotocol/inspector --config inspector-config.json --server sushimcp",
-    "build": "tsup src/index.ts --format esm --dts --minify --tsconfig tsconfig.build.json --external @lancedb/lancedb --external apache-arrow && cp -r static/ dist/static",
+    "build": "tsup src/index.ts --format esm --dts --minify --tsconfig tsconfig.build.json --external @lancedb/lancedb --external apache-arrow --external defuddle --external jsdom && cp -r static/ dist/static",
     "start": "node dist/index.js",
     "prepublishOnly": "npm run build",
     "clear:npx:cache": "npx clear-npx-cache",
@@ -52,6 +52,8 @@
     "@modelcontextprotocol/sdk": "^1.26.0",
     "apache-arrow": "^21.1.0",
     "commander": "^14.0.3",
+    "defuddle": "^0.7.0",
+    "jsdom": "^24.1.3",
     "zod": "^4.3.6"
   },
   "devDependencies": {

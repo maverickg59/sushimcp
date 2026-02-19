@@ -17,6 +17,12 @@ export * from "./api_search_fetch_openapi_spec.js";
 // Export pseudo llms.txt generator
 export * from "./generate_pseudo_llms_txt.js";
 
+// Export website parser
+export * from "./parse_website.js";
+
+// Export website link search
+export * from "./search_website_links.js";
+
 // Export RAG search tool
 export * from "./rag_search.js";
 
@@ -27,6 +33,8 @@ export {
   GitHubPullRequestsInputSchema,
   GitHubIssuesInputSchema,
   GeneratePseudoLlmsTxtInputSchema,
+  ParseWebsiteInputSchema,
+  SearchWebsiteLinksInputSchema,
 } from "./tool_schemas.js";
 
 // Copyright (C) 2026 Christopher White

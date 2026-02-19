@@ -262,3 +262,30 @@ export const GeneratePseudoLlmsTxtInputSchema = z.object({
 export type GeneratePseudoLlmsTxtInput = z.infer<
   typeof GeneratePseudoLlmsTxtInputSchema
 >;
+
+/**
+ * Schema for parsing a website to markdown.
+ */
+export const ParseWebsiteInputSchema = z.object({
+  url: z.union([
+    z.string().url(),
+    z.array(z.string().url()),
+  ]).describe("URL or array of URLs to parse"),
+});
+
+export type ParseWebsiteInput = z.infer<typeof ParseWebsiteInputSchema>;
+
+/**
+ * Schema for searching discovered website links.
+ */
+export const SearchWebsiteLinksInputSchema = z.object({
+  query: z
+    .string()
+    .describe("Text to search for in link text and URLs"),
+  domain: z
+    .string()
+    .optional()
+    .describe("Filter results to a specific domain"),
+});
+
+export type SearchWebsiteLinksInput = z.infer<typeof SearchWebsiteLinksInputSchema>;

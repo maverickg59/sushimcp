@@ -22,11 +22,15 @@ import {
   api_search_fetch_openapi_spec,
   rag_search,
   generate_pseudo_llms_txt,
+  parse_website,
+  search_website_links,
   UrlFetchInputSchema,
   GitHubProjectsInputSchema,
   GitHubPullRequestsInputSchema,
   GitHubIssuesInputSchema,
   GeneratePseudoLlmsTxtInputSchema,
+  ParseWebsiteInputSchema,
+  SearchWebsiteLinksInputSchema,
 } from "#tools/index.js";
 import {
   parseCliArgs,
@@ -242,7 +246,7 @@ server.registerTool(
   "fetch_openapi_spec",
   {
     title: "Fetch OpenAPI spec content",
-    description: "Fetches the content of one or more OpenAPI spec URLs.",
+    description: "Fetches the content of one or more OpenAPI spec URLs. Returns the raw spec content for each URL provided.",
     inputSchema: {
       input: UrlFetchInputSchema.describe(
         "URL string, URL object, or array of URL/objects to fetch OpenAPI specs from",
@@ -334,6 +338,59 @@ server.registerTool(
       throw new Error("No repo URL provided to generate_pseudo_llms_txt");
     }
     return generate_pseudo_llms_txt({ repo: params.repo });
+  },
+);
+
+// --- Parse Website (both modes) --- //
+
+server.registerTool(
+  "parse_website",
+  {
+    title: "Parse website to markdown",
+    description:
+      "Parse one or more URLs and convert to markdown. Also extracts all links from the page for discovery via search_website_links.",
+    inputSchema: ParseWebsiteInputSchema,
+    annotations: {
+      title: "Parse website to markdown",
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: true,
+    },
+  },
+  async (params) => {
+    if (!params?.url) {
+      throw new Error("No URL provided to parse_website");
+    }
+    return parse_website({ url: params.url });
+  },
+);
+
+// --- Search Website Links (both modes) --- //
+
+server.registerTool(
+  "search_website_links",
+  {
+    title: "Search discovered website links",
+    description:
+      "Search links discovered from previously parsed web pages. Use this to find specific documentation pages without crawling an entire site. Parse a page first to populate the link index.",
+    inputSchema: SearchWebsiteLinksInputSchema,
+    annotations: {
+      title: "Search discovered links",
+      readOnlyHint: true,
+      destructiveHint: false,
+      idempotentHint: true,
+      openWorldHint: false,
+    },
+  },
+  async (params) => {
+    if (!params?.query) {
+      throw new Error("No query provided to search_website_links");
+    }
+    return search_website_links({
+      query: params.query,
+      domain: params.domain,
+    });
   },
 );
 
